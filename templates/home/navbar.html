@@ -1,0 +1,66 @@
+<nav
+  class="container navbar navbar-expand-lg rounded-5 fixed-top shadow-sm mt-3"
+  id="mainNav"
+>
+  <div class="container px-5">
+    <a class="navbar-brand" href="{{url_for('home')}}#page-top"
+      ><img
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Brand Logo"
+    /></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarResponsive"
+      aria-controls="navbarResponsive"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <i class="bx bx-menu"></i>
+    </button>
+    <div class="collapse navbar-collapse gap-2" id="navbarResponsive">
+      <ul class="navbar-nav ms-auto my-3 my-lg-0 me-1 gap-2">
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('home')}}#home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('home')}}#best-seller"
+            >Best Seller</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('home')}}#about-us">About Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('home')}}#testimonial"
+            >Testimonial</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('contact')}}">Contact</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('products')}}">Products</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center">
+        <a href="{{url_for('cart')}}" class="btn btn-lg">
+          <span class="d-flex align-items-center">
+            <i class="bx bxs-cart-add bx-md text-light"></i>
+          </span>
+        </a>
+
+        <a
+          href="{{url_for('login')}}"
+          class="btn btn-light btn-lg rounded-pill px-3 mb-2 mb-lg-0"
+        >
+          <span class="d-flex align-items-center">
+            <i class="bx bxs-user me-2"></i>
+            <span class="small fw-bold">Login</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
