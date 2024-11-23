@@ -1,0 +1,64 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Products Table | By.Notti{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h4 class="mb-2 mb-4">Products Table</h4>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Products</h6>
+        </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table
+            class="table table-bordered"
+            width="100%"
+            cellspacing="0"
+          >
+            <thead>
+              <tr>
+                <th class="align-middle">No.</th>
+                <th class="align-middle">Product Name</th>
+                <th class="align-middle">Price</th>
+                <th class="align-middle">Category</th>
+                <th class="align-middle">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="align-middle">1</td>
+                <td class="align-middle">Brownies Cookies</td>
+                <td class="align-middle">Rp. 25.000</td>
+                <td class="align-middle">Brownies</td>
+                <td class="align-middle">
+                  <div class="d-flex flex-column flex-lg-row gap-1">
+                    <a
+                      href="#"
+                      class="btn btn-warning btn-icon-split d-flex justify-content-start"
+                    >
+                      <span class="icon text-white-50">
+                        <i class="fas fa-pen-square"></i>
+                      </span>
+                      <span class="text">Edit</span>
+                    </a>
+                    <a
+                      href="#"
+                      class="btn btn-danger btn-icon-split d-flex justify-content-start"
+                    >
+                      <span class="icon text-white-50">
+                        <i class="fas fa-trash"></i>
+                      </span>
+                      <span class="text">Delete</span>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
