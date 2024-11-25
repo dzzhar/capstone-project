@@ -191,6 +191,7 @@ section {
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #2a5a94;
   --bs-btn-hover-border-color: #2a5a94;
+  --bs-btn-active-bg: #1c3b6a;
 }
 
 .btn-light {
@@ -261,77 +262,66 @@ footer img {
 .bx-border-circle {
   border: 1px solid rgba(var(--bs-light-rgb), var(--bs-text-opacity));
 }
-<<<<<<< HEAD
-body {
-  background-color: #E7ECF8;
+
+/* Product Page */
+.product-container {
+  margin-top: 9rem;
+  padding-inline: 1.5rem;
 }
-.navbar {
-    background-color: #0F1F4B;
-    border-radius: 20px;
-    padding: 10px 20px;
-    margin: 20px auto; 
-    max-width: 95%; 
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-.navbar-brand {
-    font-weight: bold;
-    color: #FFFFFF;
-}
-.navbar-nav .nav-link {
-    color: #FFFFFF;
-    font-weight: 500;
-    margin-right: 10px;
-}
-.btn-login {
-    border-radius: 20px;
-    background-color: #FFFFFF;
-    color: #0F1F4B;
-    border: 1px solid #0F1F4B;
-}
-.btn-login:hover {
-    background-color: #0F1F4B;
-    color: #FFFFFF;
-}
+
 .product-card {
-  border: 1px solid #0F1F4B;
+  border: 1px solid var(--bs-primary);
   border-radius: 10px;
-  background-color: #F9FAFB;
+  background-color: #f9fafb;
   text-align: center;
   padding: 10px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  flex: 0 0 auto;
+  width: 300px;
 }
 
 .product-card img {
   border-radius: 8px;
   width: 100%;
-  height: auto;
+  height: 200px;
   margin-bottom: 10px;
 }
 
 .product-card h5 {
   font-size: 1rem;
-  color: #0F1F4B;
+  color: var(--bs-primary);
   margin: 10px 0;
 }
 
 .product-card p {
   font-size: 0.9rem;
-  color: #0F1F4B;
+  color: var(--bs-primary);
 }
 
 .product-card .btn {
   font-size: 0.85rem;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
-.container h2 {
-  color: #0F1F4B; 
+.product-container h2 {
+  color: var(--bs-primary);
   font-weight: bold;
-  font-size: 1.5rem; 
-  margin-bottom: 20px; 
+  font-size: 1.5rem;
+  margin-bottom: 20px;
 }
-=======
+
+.scrollable-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollable-container {
+  display: flex;
+  gap: 1rem;
+  overflow-x: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 /* Contact */
 .img-contact {
@@ -398,4 +388,3 @@ body {
     margin-top: 12rem;
   }
 }
->>>>>>> 8c45feeecbbe7918ec8ff0f37001e6e3b572bff2
