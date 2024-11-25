@@ -44,6 +44,16 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* Typography */
 h1,
 .h1,
@@ -251,6 +261,7 @@ footer img {
 .bx-border-circle {
   border: 1px solid rgba(var(--bs-light-rgb), var(--bs-text-opacity));
 }
+<<<<<<< HEAD
 body {
   background-color: #E7ECF8;
 }
@@ -320,3 +331,71 @@ body {
   font-size: 1.5rem; 
   margin-bottom: 20px; 
 }
+=======
+
+/* Contact */
+.img-contact {
+  height: 10rem;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 2rem 2rem 0 0;
+}
+
+.text-area {
+  resize: none;
+  height: 10vh;
+}
+
+@media (min-width: 992px) {
+  .img-contact {
+    height: 45rem;
+    border-radius: 2rem 0 0 2rem;
+  }
+}
+
+/* Cart Page */
+.cart {
+  margin-top: 9rem;
+}
+
+.border-number {
+  border: 1px solid var(--bs-gray);
+  border-radius: 0.2rem;
+  overflow: hidden;
+}
+
+.border-number p {
+  border-left: 1px solid var(--bs-gray);
+  border-right: 1px solid var(--bs-gray);
+  color: var(--bs-gray);
+  padding: 0.2rem;
+  margin: 0;
+  width: 60px;
+  text-align: center;
+}
+
+.border-number button {
+  color: var(--bs-gray);
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s ease;
+  width: 30px;
+  height: 30px;
+}
+
+.border-number button:active {
+  color: white;
+  background-color: var(--bs-primary);
+}
+
+.border-number button:focus {
+  color: white;
+  background-color: var(--bs-primary);
+}
+
+@media (min-width: 992px) {
+  .cart {
+    margin-top: 12rem;
+  }
+}
+>>>>>>> 8c45feeecbbe7918ec8ff0f37001e6e3b572bff2
