@@ -17,9 +17,9 @@
                         <tr>
                             <th class="align-middle">No.</th>
                             <th class="align-middle">Product Name</th>
+                            <th class="align-middle">Image Product</th>
                             <th class="align-middle">Price</th>
                             <th class="align-middle">Category</th>
-                            <th class="align-middle">Image</th>
                             <th class="align-middle">Action</th>
                         </tr>
                     </thead>
@@ -28,18 +28,18 @@
                         <tr>
                             <td class="align-middle">{{ loop.index }}</td>
                             <td class="align-middle">{{ product.product_name }}</td>
-                            <td class="align-middle">Rp {{ product.price }}</td>
-                            <td class="align-middle">{{ product.category }}</td>
                             <td class="align-middle">
                                 {% if product.image %}
                                 <img src="{{ url_for('static', filename='images/' ~ product.image) }}" 
                                      alt="{{ product.product_name }}" 
-                                     class="img-thumbnail" 
-                                     style="width: 120px; height: 100px;">
+                                     class=" object-fit-cover" 
+                                     style="width: 100px; height: 100px;">
                                 {% else %}
                                 No Image
                                 {% endif %}
                             </td>
+                            <td class="align-middle">Rp. {{ product.price }}</td>
+                            <td class="align-middle">{{ product.category }}</td>
                             <td class="align-middle">
                                 <!-- Tombol Edit -->
                                 <a href="{{ url_for('edit_product', product_id=product._id) }}" class="btn btn-warning btn-icon-split">
