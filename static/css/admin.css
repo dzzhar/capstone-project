@@ -428,14 +428,14 @@ a.btn.disabled {
 
 .btn-primary:hover {
   color: #fff;
-  background-color: #2e59d9;
-  border-color: #2653d4;
+  background-color: #2a5a94;
+  border-color: #2a5a94;
 }
 
 .btn-primary:focus {
   color: #fff;
-  background-color: #2e59d9;
-  border-color: #2653d4;
+  background-color: #2a5a94;
+  border-color: #2a5a94;
   box-shadow: 0 0 0 0.2rem rgba(105, 136, 228, 0.5);
 }
 
@@ -449,8 +449,8 @@ a.btn.disabled {
 .btn-primary:not(:disabled):not(.disabled):active,
 .btn-primary:not(:disabled):not(.disabled).active {
   color: #fff;
-  background-color: #2653d4;
-  border-color: #244ec9;
+  background-color: #2a5a94;
+  border-color: #2a5a94;
 }
 
 .btn-primary:not(:disabled):not(.disabled):active:focus,

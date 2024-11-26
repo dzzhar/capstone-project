@@ -180,10 +180,6 @@ section {
 }
 
 /* Buttons */
-.btn {
-  border: none;
-}
-
 .btn-primary {
   --bs-btn-color: #fff;
   --bs-btn-bg: #204073;
@@ -197,6 +193,10 @@ section {
 .btn-light {
   --bs-btn-color: #204073;
   --bs-btn-hover-color: #204073;
+}
+
+.btn-outline-light:hover {
+  color: #204073;
 }
 
 .btn-icon:hover {
@@ -325,7 +325,7 @@ footer img {
 
 /* Contact */
 .img-contact {
-  height: 10rem;
+  height: 8rem;
   width: 100%;
   object-fit: cover;
   border-radius: 2rem 2rem 0 0;
@@ -336,9 +336,14 @@ footer img {
   height: 10vh;
 }
 
+.hr-line {
+  width: 100%;
+  border-radius: 1rem;
+}
+
 @media (min-width: 992px) {
   .img-contact {
-    height: 45rem;
+    height: 40rem;
     border-radius: 2rem 0 0 2rem;
   }
 }

@@ -8,7 +8,7 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Sign In | By.Notti</title>
+    <title>Sign Up | By.Notti</title>
     <link
       rel="icon"
       href="{{ url_for('static', filename='images/icon.png') }}"
@@ -43,32 +43,33 @@
             <img
               src="{{ url_for('static', filename='images/form-img.png') }}"
               alt="brownies photo"
-              class="img-fluid img-contact"
+              class="img-fluid img-contact object-fit-cover"
             />
           </a>
 
-          <div class="col-lg-7 text-center text-lg-start py-5 p-0">
-            <div class="card-body text-light mx-4 mx-lg-5 px-lg-3">
-              <h1 class="mb-5 display-2 text-light">Sign In</h1>
+          <div class="col-lg-7 text-center text-lg-start p-4 p-md-5 p-lg-0 px-lg-5">
+            <div class="card-body text-light px-lg-3 ">
+              <h2 class="display-4 mb-4 mb-md-5 display-2 text-light">Sign In</h2>
 
               <div class="row">
                 <div class="col-md-6 col-lg-12 mb-4">
                   <div data-mdb-input-init class="form-outline">
-                    <label class="form-label lead fw-semibold" for="fullname"
+                    <label
+                      class="form-label fw-semibold"
+                      for="phone_number"
                       >Email</label
                     >
                     <input
-                      type="text"
-                      id="fullname"
+                      type="email"
+                      id="phone_number"
                       class="form-control form-control-lg rounded-pill"
                     />
                   </div>
                 </div>
-
                 <div class="col-md-6 col-lg-12 mb-4">
                   <div data-mdb-input-init class="form-outline">
                     <label
-                      class="form-label lead fw-semibold"
+                      class="form-label fw-semibold"
                       for="phone_number"
                       >Password</label
                     >
@@ -80,23 +81,18 @@
                   </div>
                 </div>
 
-              <div class="d-flex justify-content-center pt-3">
+              <div class="pt-2">
                 <button
                   type="button"
                   data-mdb-button-init
                   data-mdb-ripple-init
-                  class="btn btn-primary btn-lg col-lg-3 rounded-pill"
+                  class="btn btn-light btn-lg ms-0 fw-bold col-12 rounded-pill mb-3"
                 >
-                  Don't Have an account?
+                  Sign In
                 </button>
-                <button
-                  type="button"
-                  data-mdb-button-init
-                  data-mdb-ripple-init
-                  class="btn btn-light btn-lg ms-2 fw-bold col-lg-6 rounded-pill"
-                >
-                  Send
-                </button>
+
+                <hr class="hr-line"/>
+                <a href="{{url_for('register')}}" class="text-white text-decoration-none">Don't have an account? <span class="fw-bold">Sign Up</span></a>
               </div>
             </div>
           </div>

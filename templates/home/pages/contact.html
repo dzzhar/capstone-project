@@ -8,7 +8,7 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Contact | By.Notti</title>
+    <title>Sign Up | By.Notti</title>
     <link
       rel="icon"
       href="{{ url_for('static', filename='images/icon.png') }}"
@@ -43,18 +43,18 @@
             <img
               src="{{ url_for('static', filename='images/form-img.png') }}"
               alt="brownies photo"
-              class="img-fluid img-contact"
+              class="img-fluid img-contact object-fit-cover"
             />
           </a>
 
-          <div class="col-lg-7 text-center text-lg-start py-5 p-0">
-            <div class="card-body text-light mx-4 mx-lg-5 px-lg-3">
-              <h1 class="mb-5 display-2 text-light">Contact Us</h1>
+          <div class="col-lg-7 text-center text-lg-start p-4 p-md-5 p-lg-0 px-lg-5">
+            <div class="card-body text-light px-lg-3 ">
+              <h2 class="display-4 mb-4 mb-md-5 display-2 text-light">Contact Us</h2>
 
               <div class="row">
-                <div class="col-md-6 col-lg-12 mb-4">
+                <div class="col-lg-12 col-md-6 mb-4">
                   <div data-mdb-input-init class="form-outline">
-                    <label class="form-label lead fw-semibold" for="fullname"
+                    <label class="form-label fw-semibold" for="fullname"
                       >Fullname</label
                     >
                     <input
@@ -68,21 +68,20 @@
                 <div class="col-md-6 col-lg-12 mb-4">
                   <div data-mdb-input-init class="form-outline">
                     <label
-                      class="form-label lead fw-semibold"
+                      class="form-label fw-semibold"
                       for="phone_number"
                       >Phone Number</label
                     >
                     <input
-                      type="number"
+                      type="text"
                       id="phone_number"
                       class="form-control form-control-lg rounded-pill"
                     />
                   </div>
                 </div>
-
                 <div class="col-md-12 mb-4">
                   <div data-mdb-input-init class="form-outline">
-                    <label class="form-label lead fw-semibold" for="message"
+                    <label class="form-label fw-semibold" for="message"
                       >Message</label
                     >
                     <textarea
@@ -98,7 +97,8 @@
                   type="button"
                   data-mdb-button-init
                   data-mdb-ripple-init
-                  class="btn btn-primary btn-lg col-lg-3 rounded-pill"
+                  class="btn btn-outline-light btn-lg col-lg-3 rounded-pill"
+                  onclick="window.history.back()"
                 >
                   Cancel
                 </button>
