@@ -1,37 +1,105 @@
 {% extends 'admin/base.html' %}
 
+<!-- title -->
 {% block title %}Create User | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
-    <div class="container-fluid">
-        <h4 class="mb-2 mb-4">Create New User</h4>
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 fw-bold text-primary">New User</h6>
-            </div>
-            <div class="card-body">
-                <div class="row d-flex gap-2">
-                    <div class="form-group">
-                        <label for="username" class="form-control-label">Username</label>
-                        <input class="form-control" type="text" id="username" placeholder="username" />
-                    </div>
-                    <div class="form-group">
-                        <label for="password" class="form-control-label">Password</label>
-                        <input class="form-control" type="email" id="password" placeholder="email@gmail.com" />
-                    </div>
-                    <div class="form-group">
-                        <label for="role" class="form-control-label">Role</label>
-                        <select class="form-control" name="role" id="role">
-                            <option disabled selected>-- select one --</option>
-                            <option value="admin">Admin</option>
-                            <option value="user">User</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end pt-3">
-                    <button class="btn btn-primary btn-md">Submit</button>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid">
+  <!-- alert -->
+  <div
+    id="successAlert"
+    class="alert alert-success alert-dismissible fade d-none"
+    role="alert"
+  >
+    <strong id="alertStrong">-</strong>
+    <span id="alertMessage">-</span>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+
+  <h4 class="mb-2 mb-4">Create New User</h4>
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold text-primary">New User</h6>
     </div>
+    <div class="card-body">
+      <div class="row d-flex gap-2">
+        <div class="form-group">
+          <label for="username" class="form-control-label">Username</label>
+          <input
+            class="form-control"
+            type="text"
+            id="username"
+            placeholder="your username"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password" class="form-control-label">Password</label>
+          <input
+            class="form-control"
+            type="email"
+            id="password"
+            placeholder="your password"
+          />
+        </div>
+        <div class="form-group">
+          <label for="role" class="form-control-label">Role</label>
+          <select class="form-control" name="role" id="role">
+            <option disabled selected>-- select one role --</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end pt-3">
+        <button class="btn btn-primary btn-md" onclick="create_user()">
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function create_user() {
+    let username = $("#username").val();
+    let password = $("#password").val();
+    let role = $("#role").val();
+
+    $.ajax({
+      type: "POST",
+      url: "/admin/user/create",
+      data: {
+        username_give: username,
+        password_give: password,
+        role_give: role,
+      },
+      success: function (response) {
+        if (response.result === "success") {
+          // ubah teks alert
+          document.getElementById("alertStrong").innerText = "Success!";
+          document.getElementById("alertMessage").innerText = response.msg;
+
+          // tampilkan alert
+          const alertBox = document.getElementById("successAlert");
+          alertBox.classList.remove("d-none");
+          alertBox.classList.add("show");
+
+          // redirect ke halaman users setelah di silang
+          const closeButton = document.querySelector(
+            "#successAlert .btn-close"
+          );
+          closeButton.addEventListener("click", function () {
+            window.location.href = "/admin/users";
+          });
+        }
+      },
+    });
+  }
+</script>
 {% endblock %}
