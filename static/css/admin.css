@@ -82,7 +82,7 @@ a {
 }
 
 a:hover {
-  color: #224abe;
+  color: #2a5a94;
   text-decoration: underline;
 }
 
@@ -274,7 +274,7 @@ hr {
   background-color: #fff;
   background-clip: padding-box;
   border: 1px solid #d1d3e2;
-  border-radius: 0.35rem;
+  border-radius: 0.5rem !important;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -1494,4 +1494,29 @@ footer.sticky-footer .copyright {
 
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
+}
+
+.input-group-text {
+  background-color: transparent;
+  border: none;
+}
+
+.input-group-text i {
+  font-size: 1.2rem;
+}
+
+/* password eye */
+.password-container {
+  position: relative;
+}
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6c757d;
+  z-index: 10;
 }

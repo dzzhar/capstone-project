@@ -41,3 +41,19 @@
         e.preventDefault();
     });
 })(jQuery);
+
+// password eye
+$(document).ready(function () {
+  $("#togglePassword").on("click", function () {
+    const passwordInput = $("#password");
+    const passwordIcon = $("#passwordToggleIcon");
+
+    if (passwordInput.attr("type") === "password") {
+      passwordInput.attr("type", "text");
+      passwordIcon.removeClass("fa-eye").addClass("fa-eye-slash");
+    } else {
+      passwordInput.attr("type", "password");
+      passwordIcon.removeClass("fa-eye-slash").addClass("fa-eye");
+    }
+  });
+});
