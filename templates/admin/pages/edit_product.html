@@ -22,8 +22,10 @@
                     <label for="category" class="form-label">Category</label>
                     <select class="form-control" id="category" name="category" required>
                         <option value="" disabled>Select Category</option>
-                        <option value="Cookies" {% if product.category == "Cookies" %}selected{% endif %}>Cookies</option>
-                        <option value="Brownies" {% if product.category == "Brownies" %}selected{% endif %}>Brownies</option>
+                        <option value="cookies  & snacks" {% if product.category == "Cookies  & Snacks" %}selected{% endif %}>Cookies</option>
+                        <option value="brownies" {% if product.category == "Brownies" %}selected{% endif %}>Brownies</option>
+                        <option value="cakes" {% if product.category == "Cakes" %}selected{% endif %}>Cakes</option>
+                        <option value="pasta" {% if product.category == "Pasta" %}selected{% endif %}>Pasta</option>
                     </select>
                 </div>
                 <div class="mb-3">

@@ -1,42 +1,137 @@
 {% extends 'admin/base.html' %}
 
+<!-- title -->
 {% block title %}Create Product | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
-    <div class="container-fluid">
-        <h4 class="mb-2 mb-4">Create New Product</h4>
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 fw-bold text-primary">New Product</h6>
-            </div>
-            <div class="card-body">
-                <div class="row d-flex gap-2">
-                    <form action="{{ url_for('create_product') }}" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="product_name" class="form-control-label">Product Name</label>
-                            <input class="form-control" type="text" id="product_name" name="product_name" placeholder="product name" />
-                        </div>
-                        <div class="form-group">
-                            <label for="price" class="form-control-label">Price</label>
-                            <input class="form-control" type="number" id="price" name="price" placeholder="25000" />
-                        </div>
-                        <div class="form-group">
-                            <label for="image" class="form-control-label">Image</label>
-                            <input class="form-control" type="file" id="image" name="image" />
-                        </div>
-                        <div class="form-group">
-                            <label for="category" class="form-control-label">Category</label>
-                            <select class="form-control" name="category" id="category">
-                                <option disabled selected>-- select one --</option>
-                                <option value="cookies">Cookies</option>
-                                <option value="brownies">Brownies</option>
-                            </select>
-                        </div>
-                        <div class="d-flex justify-content-end pt-3">
-                            <button type="submit" class="btn btn-primary btn-md">Submit</button>
-                        </div>
-                    </form>
-            </div>
-        </div>
+<div class="container-fluid">
+  <!-- alert -->
+  <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+    <strong id="alertStrong">-</strong>
+    <span id="alertMessage">-</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <h4 class="mb-2 mb-4">Create New Product</h4>
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold text-primary">New Product</h6>
     </div>
+    <div class="card-body">
+      <div class="row d-flex gap-2">
+        <div class="form-group">
+          <label for="product_name" class="form-control-label">Product Name</label>
+          <input class="form-control" type="text" id="product_name" placeholder="Product name" />
+          <small id="product_nameErrorMessage" class="form-text text-danger d-none">Product name cannot be empty.</small>
+        </div>
+        <div class="form-group">
+          <label for="price" class="form-control-label">Price</label>
+          <input class="form-control" type="number" id="price" placeholder="Price" />
+          <small id="priceErrorMessage" class="form-text text-danger d-none">Price cannot be empty.</small>
+        </div>
+        <div class="form-group">
+          <label for="image" class="form-control-label">Image</label>
+          <input class="form-control" type="file" id="image" />
+        </div>
+        <div class="form-group">
+          <label for="category" class="form-control-label">Category</label>
+          <select class="form-control" id="category">
+            <option disabled selected>-- select category --</option>
+            <option value="cookies & snacks">Cookies & Snacks</option>
+            <option value="brownies">Brownies</option>
+            <option value="cakes">Cakes</option>
+            <option value="pasta">Pasta</option>
+          </select>
+          <small id="categoryErrorMessage" class="form-text text-danger d-none">Category cannot be empty.</small>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end pt-3">
+        <button class="btn btn-primary btn-md" onclick="create_product()">Add Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function create_product() {
+    let product_name = $("#product_name").val();
+    let price = $("#price").val();
+    let category = $("#category").val();
+    let image = $("#image")[0].files[0];
+
+    // Validation
+    if (!product_name || !price || !category) {
+      if (!product_name) {
+        $("#product_nameErrorMessage").removeClass("d-none");
+      }
+      if (!price) {
+        $("#priceErrorMessage").removeClass("d-none");
+      }
+      if (!category) {
+        $("#categoryErrorMessage").removeClass("d-none");
+      }
+      return;
+    }
+
+    // Hide error messages when input is filled
+    $("#product_name").on("input", function() {
+      if ($(this).val()) {
+        $("#product_nameErrorMessage").addClass("d-none");
+      }
+    });
+
+    $("#price").on("input", function() {
+      if ($(this).val()) {
+        $("#priceErrorMessage").addClass("d-none");
+      }
+    });
+
+    $("#category").on("change", function() {
+      if ($(this).val()) {
+        $("#categoryErrorMessage").addClass("d-none");
+      }
+    });
+
+    // Create FormData for sending via AJAX
+    let formData = new FormData();
+    formData.append("product_name", product_name);
+    formData.append("price", price);
+    formData.append("category", category);
+    if (image) {
+      formData.append("image", image);
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "/admin/products/create",
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function(response) {
+        if (response.result === "success") {
+          // Update alert message
+          document.getElementById("alertStrong").innerText = "Success!";
+          document.getElementById("alertMessage").innerText = response.msg;
+
+          // Display success alert
+          const alertBox = document.getElementById("successAlert");
+          alertBox.classList.remove("d-none");
+          alertBox.classList.add("show");
+
+          // Optionally, redirect to products page after close
+          const closeButton = document.querySelector("#successAlert .btn-close");
+          closeButton.addEventListener("click", function () {
+            window.location.href = "/admin/products";
+          });
+        }
+      },
+      error: function() {
+        alert("There was an error while creating the product. Please try again.");
+      }
+    });
+  }
+</script>
+
 {% endblock %}

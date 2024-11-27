@@ -1,4 +1,5 @@
 import os
+from werkzeug.utils import secure_filename
 from datetime import datetime
 from os.path import dirname, join
 
@@ -22,6 +23,11 @@ app = Flask(__name__)
 # Konfigurasi untuk folder upload
 UPLOAD_FOLDER = "static/images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["ALLOWED_EXTENSIONS"] = {"png", "jpg", "jpeg", "gif"}
+
+# Memeriksa apakah file yang diupload memiliki ekstensi yang valid
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
 
 
 # Rute untuk halaman utama
@@ -152,21 +158,23 @@ def products_table():
 @app.route("/admin/products/create", methods=["GET", "POST"])
 def create_product():
     if request.method == "POST":
+        # Mengambil data dari form
         product_name = request.form["product_name"]
         price = request.form["price"]
         category = request.form["category"]
         image = request.files["image"]
 
+        # Cek apakah semua field diisi
         if not product_name or not price or not category:
-            return "All fields are required!", 400
+            return jsonify({"result": "error", "msg": "All fields are required!"}), 400
 
-        # Simpan file gambar jika ada
+        # Menyimpan gambar jika ada
         image_filename = None
         if image and image.filename != "":
             image_filename = image.filename
             image.save(os.path.join(app.config["UPLOAD_FOLDER"], image_filename))
 
-        # Simpan data ke MongoDB
+        # Menyimpan produk ke database
         new_product = {
             "product_name": product_name,
             "price": int(price),
@@ -174,13 +182,16 @@ def create_product():
             "image": image_filename,
         }
         db.products.insert_one(new_product)
-        return redirect(url_for("products_table"))
 
+        return jsonify({"result": "success", "msg": "Product successfully created!"})
+
+    # Menampilkan halaman form
     return render_template("admin/pages/create_product.html")
 
 
+
 # Rute untuk mengedit produk
-@app.route("/admin/products/edit/<string:product_id>", methods=["GET", "POST"])
+@app.route("/admin/product/edit/<string:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
     # Ambil data produk dari database
     product = db.products.find_one({"_id": ObjectId(product_id)})
@@ -188,9 +199,15 @@ def edit_product(product_id):
     if not product:
         return "Product not found!", 404
 
-    # Daftar kategori (Cookies dan Brownies)
+    # Daftar kategori (misalnya Cookies dan Brownies)
     categories = ["Cookies", "Brownies"]
 
+    # Jika permintaan menggunakan method GET
+    if request.method == "GET":
+        # Render halaman edit produk dengan data produk yang ada
+        return render_template("admin/pages/edit_product.html", product=product, categories=categories)
+
+    # Jika permintaan menggunakan method POST (untuk update produk)
     if request.method == "POST":
         # Ambil data dari form
         product_name = request.form["product_name"]
@@ -198,11 +215,11 @@ def edit_product(product_id):
         category = request.form["category"]
         image = request.files["image"]
 
-        # Validasi input
+        # Validasi input (pastikan semua kolom diisi)
         if not product_name or not price or not category:
             return "All fields are required!", 400
 
-        # Data untuk update produk
+        # Menyiapkan data untuk update produk
         update_data = {
             "product_name": product_name,
             "price": int(price),
@@ -211,24 +228,31 @@ def edit_product(product_id):
 
         # Update gambar jika ada
         if image and image.filename != "":
-            image_filename = image.filename
+            image_filename = secure_filename(image.filename)
             image.save(os.path.join(app.config["UPLOAD_FOLDER"], image_filename))
             update_data["image"] = image_filename
 
         # Update produk di database
         db.products.update_one({"_id": ObjectId(product_id)}, {"$set": update_data})
+
+        # Kembali ke halaman daftar produk setelah berhasil diupdate
         return redirect(url_for("products_table"))
 
-    return render_template(
-        "admin/pages/edit_product.html", product=product, categories=categories
-    )
 
+# Endpoint untuk menghapus produk
+@app.route("/admin/product/delete", methods=["POST"])
+def delete_product():
+    product_id = request.form.get("id_give")  # Mendapatkan ID produk yang akan dihapus
 
-# Rute untuk menghapus produk
-@app.route("/admin/products/delete/<string:product_id>")
-def delete_product(product_id):
-    db.products.delete_one({"_id": ObjectId(product_id)})
-    return redirect(url_for("products_table"))
+    # Menghapus produk dari database berdasarkan ID
+    result = db.products.delete_one({"_id": ObjectId(product_id)})
+
+    if result.deleted_count == 1:
+        # Mengirimkan respon jika produk berhasil dihapus
+        return jsonify({"msg": "Data User Successfully Deleted!"}), 200
+    else:
+        # Mengirimkan respon jika produk tidak ditemukan
+        return jsonify({"msg": "Produk tidak ditemukan!"}), 404
 
 
 # Jalankan aplikasi

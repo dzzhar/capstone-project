@@ -1,69 +1,127 @@
 {% extends 'admin/base.html' %}
 
+<!-- title -->
 {% block title %}Products Table | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
 <div class="container-fluid">
-    <h4 class="mb-2 mb-4">Products Table</h4>
+  <!-- alert -->
+  <div
+    id="successAlert"
+    class="alert alert-success alert-dismissible fade d-none"
+    role="alert"
+  >
+    <strong id="alertStrong">-</strong>
+    <span id="alertMessage">-</span>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  <h4 class="mb-2 mb-4">Products Table</h4>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 fw-bold text-primary">Products</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th class="align-middle">No.</th>
-                            <th class="align-middle">Product Name</th>
-                            <th class="align-middle">Image Product</th>
-                            <th class="align-middle">Price</th>
-                            <th class="align-middle">Category</th>
-                            <th class="align-middle">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in products %}
-                        <tr>
-                            <td class="align-middle">{{ loop.index }}</td>
-                            <td class="align-middle">{{ product.product_name }}</td>
-                            <td class="align-middle">
-                                {% if product.image %}
-                                <img src="{{ url_for('static', filename='images/' ~ product.image) }}" 
-                                     alt="{{ product.product_name }}" 
-                                     class=" object-fit-cover" 
-                                     style="width: 100px; height: 100px;">
-                                {% else %}
-                                No Image
-                                {% endif %}
-                            </td>
-                            <td class="align-middle">Rp. {{ product.price }}</td>
-                            <td class="align-middle">{{ product.category }}</td>
-                            <td class="align-middle">
-                                <!-- Tombol Edit -->
-                                <a href="{{ url_for('edit_product', product_id=product._id) }}" class="btn btn-warning btn-icon-split">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-edit"></i>
-                                    </span>
-                                    <span class="text">Edit</span>
-                                </a>
-
-                                <!-- Tombol Delete -->
-                                <a href="{{ url_for('delete_product', product_id=product._id) }}" 
-                                   class="btn btn-danger btn-icon-split">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-trash"></i>
-                                    </span>
-                                    <span class="text">Delete</span>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold text-primary">Products</h6>
     </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th class="align-middle">No.</th>
+              <th class="align-middle">Product Name</th>
+              <th class="align-middle">Image Product</th>
+              <th class="align-middle">Price</th>
+              <th class="align-middle">Category</th>
+              <th class="align-middle">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for product in products %}
+            <!-- set data -->
+            {% set number = loop.index %}
+            {% set id = product._id %}
+            {% set product_name = product.product_name %}
+            {% set price = product.price %}
+            {% set category = product.category %}
+            {% set image = product.image %}
+
+            <tr>
+              <td class="align-middle">{{number}}</td>
+              <td class="align-middle">{{product_name}}</td>
+              <td class="align-middle">
+                {% if image %}
+                <img src="{{ url_for('static', filename='images/' ~ image) }}" 
+                     alt="{{ product_name }}" 
+                     class="object-fit-cover" 
+                     style="width: 100px; height: 100px;">
+                {% else %}
+                No Image
+                {% endif %}
+              </td>
+              <td class="align-middle">Rp. {{ price }}</td>
+              <td class="align-middle">{{ category }}</td>
+              <td class="align-middle">
+                <div class="d-flex flex-column flex-lg-row gap-1">
+                  <a
+                    href="/admin/product/edit/{{ id }}"
+                    class="btn btn-warning btn-icon-split d-flex justify-content-start"
+                  >
+                    <span class="icon text-white-50">
+                      <i class="fas fa-pen-square"></i>
+                    </span>
+                    <span class="text">Edit</span>
+                  </a>
+                  <a
+                    href="javascript:delete_product('{{ id }}')"
+                    class="btn btn-danger btn-icon-split d-flex justify-content-start"
+                  >
+                    <span class="icon text-white-50">
+                      <i class="fas fa-trash"></i>
+                    </span>
+                    <span class="text">Delete</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  function delete_product(id) {
+    $.ajax({
+      type: "POST",
+      url: "/admin/product/delete",
+      data: {
+        id_give: id,
+      },
+      success: function (response) {
+        // mengubah teks alert
+        document.getElementById("alertStrong").innerText = "Success!";
+        document.getElementById("alertMessage").innerText = response.msg;
+
+        // menampilkan alert
+        const alertBox = document.getElementById("successAlert");
+        alertBox.classList.remove("d-none");
+        alertBox.classList.add("show");
+
+        // reload halaman setelah menutup alert
+        const closeButton = document.querySelector("#successAlert .btn-close");
+        closeButton.addEventListener("click", function () {
+          window.location.reload();
+        });
+      },
+    });
+  }
+</script>
 {% endblock %}
