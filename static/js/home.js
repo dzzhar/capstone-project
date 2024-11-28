@@ -1,3 +1,31 @@
+$(document).ready(function () {
+  $("#togglePassword").on("click", function () {
+    const passwordInput = $("#password");
+    const passwordIcon = $("#passwordToggleIcon");
+
+    if (passwordInput.attr("type") === "password") {
+      passwordInput.attr("type", "text"); // Show password
+      passwordIcon.removeClass("fa-eye").addClass("fa-eye-slash"); // Change icon to eye-slash
+    } else {
+      passwordInput.attr("type", "password"); // Hide password
+      passwordIcon.removeClass("fa-eye-slash").addClass("fa-eye"); // Change icon to eye
+    }
+  });
+
+  $("#toggleConfirmPassword").on("click", function () {
+    const confirmPasswordInput = $("#confirm_password");
+    const confirmPasswordIcon = $("#confirmPasswordToggleIcon");
+
+    if (confirmPasswordInput.attr("type") === "password") {
+      confirmPasswordInput.attr("type", "text"); // Show confirm password
+      confirmPasswordIcon.removeClass("fa-eye").addClass("fa-eye-slash"); // Change icon to eye-slash
+    } else {
+      confirmPasswordInput.attr("type", "password"); // Hide confirm password
+      confirmPasswordIcon.removeClass("fa-eye-slash").addClass("fa-eye"); // Change icon to eye
+    }
+  });
+});
+
 function formatCurrency(amount) {
   return "Rp. " + amount.toLocaleString("id-ID");
 }

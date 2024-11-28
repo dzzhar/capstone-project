@@ -1,12 +1,14 @@
+import hashlib
 import os
-from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 from os.path import dirname, join
 
+import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from pymongo import MongoClient
+from werkzeug.utils import secure_filename
 
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -18,6 +20,8 @@ DB_NAME = os.environ.get("DB_NAME")
 client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
+SECRET_KEY = "SPARTA"
+
 app = Flask(__name__)
 
 # Konfigurasi untuk folder upload
@@ -25,15 +29,125 @@ UPLOAD_FOLDER = "static/images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["ALLOWED_EXTENSIONS"] = {"png", "jpg", "jpeg", "gif"}
 
+
 # Memeriksa apakah file yang diupload memiliki ekstensi yang valid
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+    )
 
 
 # Rute untuk halaman utama
 @app.route("/")
 def home():
-    return render_template("home/pages/home.html")
+    # menyimpan token kedalam mytoken
+    token_receive = request.cookies.get("mytoken")
+    user_info = None
+    is_logged_in = False
+
+    if token_receive:
+        try:
+            # menggunakan jwt.decode untuk decode token
+            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+            user_info = db.users.find_one({"username": payload["id"]})
+
+            # Jika token valid, render halaman home dengan status login
+            return render_template(
+                "home/pages/home.html", is_logged_in=True, user_info=user_info
+            )
+
+        # jika token kadaluarsa
+        except jwt.ExpiredSignatureError:
+            # render ke halaman awal dengan status tidak login
+            return render_template(
+                "home/pages/login.html", is_logged_in=False, user_info=None
+            )
+
+        # jika token tidak valid
+        except jwt.exceptions.DecodeError:
+            # render ke halaman awal dengan status tidak login
+            return render_template(
+                "home/pages/login.html", is_logged_in=False, user_info=None
+            )
+
+    else:
+        return render_template(
+            "home/pages/home.html", is_logged_in=is_logged_in, user_info=user_info
+        )
+
+
+# endpoint register
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username_receive = request.form["username_give"]
+        password_receive = request.form["password_give"]
+
+        # periksa keunikan username
+        if db.users.find_one({"username": username_receive}):
+            return jsonify({"result": "failure", "msg": "Username already exists."})
+
+        # hashing password
+        hash_password = hashlib.sha256(password_receive.encode("utf-8")).hexdigest()
+
+        new_user = {
+            "username": username_receive,
+            "password": hash_password,
+            "role": "user",
+        }
+
+        # simpan user baru ke collection
+        db.users.insert_one(new_user)
+
+        return jsonify(
+            {"result": "success", "msg": "You have successfully registered!"}
+        )
+
+    return render_template("home/pages/register.html")
+
+
+# endpoint login
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username_receive = request.form["username_give"]
+        password_receive = request.form["password_give"]
+
+        hash_password = hashlib.sha256(password_receive.encode("utf-8")).hexdigest()
+
+        user = db.users.find_one(
+            {"username": username_receive, "password": hash_password}
+        )
+
+        # jika user tersedia
+        if user:
+            # membuat payload untuk token JWT
+            payload = {
+                "id": user["username"],
+                "exp": datetime.utcnow() + timedelta(seconds=3000),
+            }
+
+            # encode JWT dengan SECRET_KEY
+            token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+            return jsonify({"result": "success", "token": token})
+
+        # jika username tidak ditemukan
+        else:
+            return jsonify({"result": "failure", "msg": "Could not find the user."})
+
+    return render_template("home/pages/login.html")
+
+
+# endpoint logout
+@app.route("/logout")
+def logout():
+    response = redirect(url_for("login"))
+
+    # menghapus cookies
+    response.set_cookie("mytoken", "", expires=0)
+    return response
 
 
 # Rute untuk halaman kontak
@@ -49,21 +163,25 @@ def products():
 
 
 # endpoint cart
-@app.route("/cart")
-def cart():
-    return render_template("home/pages/cart.html")
+@app.route("/cart/<username>")
+def cart(username):
+    token_receive = request.cookies.get("mytoken")
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
 
+        # Pastikan username di URL sama dengan username di token
+        if username != payload["id"]:
+            return redirect(url_for("login"))
 
-# endpoint login
-@app.route("/login")
-def login():
-    return render_template("home/pages/login.html")
+        user_info = db.users.find_one({"username": username})
+        is_logged_in = True
+        return render_template(
+            "home/pages/cart.html", user_info=user_info, is_logged_in=is_logged_in
+        )
 
-
-# endpoint register
-@app.route("/register")
-def register():
-    return render_template("home/pages/register.html")
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        is_logged_in = False
+        return redirect(url_for("login"))
 
 
 # endpoint dashboard table users
@@ -189,7 +307,6 @@ def create_product():
     return render_template("admin/pages/create_product.html")
 
 
-
 # Rute untuk mengedit produk
 @app.route("/admin/product/edit/<string:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
@@ -205,7 +322,9 @@ def edit_product(product_id):
     # Jika permintaan menggunakan method GET
     if request.method == "GET":
         # Render halaman edit produk dengan data produk yang ada
-        return render_template("admin/pages/edit_product.html", product=product, categories=categories)
+        return render_template(
+            "admin/pages/edit_product.html", product=product, categories=categories
+        )
 
     # Jika permintaan menggunakan method POST (untuk update produk)
     if request.method == "POST":

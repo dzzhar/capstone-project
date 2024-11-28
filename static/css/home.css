@@ -161,6 +161,10 @@ h2,
   z-index: 1030;
 }
 
+.btn-icon {
+  border: none;
+}
+
 /* Hero Section */
 .hero {
   padding-top: 12rem;
@@ -343,7 +347,7 @@ footer img {
 
 @media (min-width: 992px) {
   .img-contact {
-    height: 40rem;
+    height: 43rem;
     border-radius: 2rem 0 0 2rem;
   }
 }
@@ -392,4 +396,17 @@ footer img {
   .cart {
     margin-top: 12rem;
   }
+}
+
+/* Register Page */
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6c757d;
+  z-index: 10;
 }
