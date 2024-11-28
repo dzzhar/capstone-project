@@ -6,7 +6,7 @@ from os.path import dirname, join
 import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
@@ -160,6 +160,12 @@ def contact():
 @app.route("/products")
 def products():
     return render_template("home/pages/products.html")
+
+
+# Rute untuk halaman produk
+@app.route("/detail_product")
+def detail_product():
+    return render_template("home/pages/detail_product.html")
 
 
 # endpoint cart

@@ -1,0 +1,45 @@
+{% extends 'home/base.html' %}
+
+<!-- title -->
+{% block title %}Detail Product | By.Notti{% endblock %}
+
+<!-- content -->
+{% block content %}
+<div class="container cart">
+  <div class="container">
+    <div class="row gx-4 gx-lg-5 align-items-center py-4 pt-lg-0">
+      <div class="col-md-6">
+        <img
+          class="card-img-top mb-5 mb-md-0 border-3 img-detail"
+          src="{{url_for('static', filename='images/best-seller1.png')}}"
+          alt="..."
+        />
+      </div>
+      <div class="col-md-6 text-primary">
+        <h1 class="display-6 fw-bolder pb-2">Shop item template</h1>
+        <div class="fs-5 mb-4">
+          <h3 class="lead fw-bold">Rp. 50.000</h3>
+        </div>
+        <p class="lead text-black text-break">
+          ebiferjfiernferjfnernferfnerofernfnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnoeneooerfnnnnnnnnnnnnnnnnnnnnnnnnnnn
+        </p>
+
+        <div class="d-flex gap-2">
+          <div class="d-flex align-items-center border-number cart-item">
+            <button class="minus-btn">-</button>
+            <p class="jumlah-item">1</p>
+            <button class="plus-btn">+</button>
+          </div>
+          <button
+            class="btn btn-outline-secondary flex-shrink-0 btn-sm"
+            type="button"
+          >
+            <i class="bi-cart-fill me-1"></i>
+            Add to cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
