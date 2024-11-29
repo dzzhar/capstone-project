@@ -112,5 +112,16 @@
       },
     });
   }
+  <div class="d-flex justify-content-end">
+    <a href="javascript:void(0)" class="btn btn-danger" onclick="confirmLogout()">Logout</a>
+</div>
+
+function confirmLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout";
+    }
+}
+
+
 </script>
 {% endblock %}

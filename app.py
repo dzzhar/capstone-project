@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from os.path import dirname, join
 
 import jwt
+from functools import wraps
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for, make_response
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
@@ -120,24 +121,48 @@ def login():
             {"username": username_receive, "password": hash_password}
         )
 
-        # jika user tersedia
+       
         if user:
             # membuat payload untuk token JWT
             payload = {
                 "id": user["username"],
+                "role": user["role"],  # Tambahkan role di payload
                 "exp": datetime.utcnow() + timedelta(seconds=3000),
             }
 
             # encode JWT dengan SECRET_KEY
             token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-            return jsonify({"result": "success", "token": token})
+            return jsonify({"result": "success", "token": token, "role": user["role"]})
 
         # jika username tidak ditemukan
         else:
             return jsonify({"result": "failure", "msg": "Could not find the user."})
 
     return render_template("home/pages/login.html")
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get("mytoken")
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            if data.get("role") != "admin":
+                return redirect("/")  
+        except jwt.ExpiredSignatureError:
+            return redirect("/login")
+        except jwt.InvalidTokenError:
+            return redirect("/login")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+@app.route("/admin/users")
+@admin_required  
+def admin_users():
+    users = list(db.users.find({})) 
+    return render_template("admin/pages/users.html", users=users)
+
 
 
 # endpoint logout
@@ -146,6 +171,28 @@ def logout():
     response = redirect(url_for("login"))
 
     # menghapus cookies
+    response.set_cookie("mytoken", "", expires=0)
+    return response
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get("mytoken")
+        if not token:
+            return redirect("/login")
+        try:
+            jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return redirect("/login")
+        except jwt.InvalidTokenError:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+# endpoint logout admin
+@app.route("/logout", methods=["GET"])
+def perform_logout():
+    response = make_response(redirect("/login"))
     response.set_cookie("mytoken", "", expires=0)
     return response
 
