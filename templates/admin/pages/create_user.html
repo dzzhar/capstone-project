@@ -36,13 +36,14 @@
             type="text"
             id="username"
             placeholder="your username"
+            required
           />
           <small
             id="usernameErrorMessage"
             class="form-text text-danger d-block pt-1 d-none"
           >
-            <i class="fas fa-exclamation-circle me-2"></i>Username cannot be
-            empty.
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span class="usernameErrorText">Username cannot be empty.</span>
           </small>
         </div>
         <div class="form-group">
@@ -53,6 +54,7 @@
               type="password"
               id="password"
               placeholder="your password"
+              required
             />
             <button class="password-toggle" type="button" id="togglePassword">
               <i class="fas fa-eye" id="passwordToggleIcon"></i>
@@ -62,8 +64,8 @@
             id="passwordErrorMessage"
             class="form-text text-danger d-block pt-1 d-none"
           >
-            <i class="fas fa-exclamation-circle me-2"></i>Password cannot be
-            empty.
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span class="passwordErrorText"> Password cannot be empty. </span>
           </small>
         </div>
 
@@ -93,6 +95,39 @@
 </div>
 
 <script>
+  $(document).ready(function () {
+    // menghilangkan error saat input diisi
+    $("#username").on("input", function () {
+      if ($(this).val()) {
+        $("#usernameErrorMessage").addClass("d-none");
+      }
+    });
+
+    $("#password").on("input", function () {
+      if ($(this).val()) {
+        $("#passwordErrorMessage").addClass("d-none");
+      }
+    });
+
+    $("#role").on("change", function () {
+      if ($(this).val()) {
+        $("#roleErrorMessage").addClass("d-none");
+      }
+    });
+  });
+
+  // fungsi format username
+  function is_nickname(asValue) {
+    var regExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
+    return regExp.test(asValue);
+  }
+
+  // fungsi format password
+  function is_password(asValue) {
+    var regExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
+    return regExp.test(asValue);
+  }
+
   function create_user() {
     let username = $("#username").val();
     let password = $("#password").val();
@@ -112,24 +147,21 @@
       return;
     }
 
-    // menghilangkan error saat input diisi
-    $("#username").on("input", function () {
-      if ($(this).val()) {
-        $("#usernameErrorMessage").addClass("d-none");
-      }
-    });
+    if (!is_nickname(username)) {
+      $("#usernameErrorMessage").removeClass("d-none");
+      $("#usernameErrorMessage .usernameErrorText").text(
+        "Username must be 8-15 characters long, containing letters, numbers, and special characters."
+      );
+      return;
+    }
 
-    $("#password").on("input", function () {
-      if ($(this).val()) {
-        $("#passwordErrorMessage").addClass("d-none");
-      }
-    });
-
-    $("#role").on("change", function () {
-      if ($(this).val()) {
-        $("#roleErrorMessage").addClass("d-none");
-      }
-    });
+    if (!is_password(password)) {
+      $("#passwordErrorMessage").removeClass("d-none");
+      $("#passwordErrorMessage .passwordErrorText").text(
+        "Username must be 8-15 characters long, containing letters, numbers, and special characters."
+      );
+      return;
+    }
 
     $.ajax({
       type: "POST",

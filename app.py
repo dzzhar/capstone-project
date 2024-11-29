@@ -1,4 +1,5 @@
 import hashlib
+import locale
 import os
 from datetime import datetime, timedelta
 from os.path import dirname, join
@@ -16,13 +17,16 @@ load_dotenv(dotenv_path)
 
 MONGODB_URI = os.environ.get("MONGODB_URI")
 DB_NAME = os.environ.get("DB_NAME")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
-SECRET_KEY = "SPARTA"
-
 app = Flask(__name__)
+
+# set local ke Indonesia
+locale.setlocale(locale.LC_ALL, "id_ID.UTF-8")
+
 
 # Konfigurasi untuk folder upload
 UPLOAD_FOLDER = "static/images"
@@ -210,10 +214,16 @@ def create_user():
         password_receive = request.form["password_give"]
         role_receive = request.form["role_give"]
 
+        hash_password = hashlib.sha256(password_receive.encode("utf-8")).hexdigest()
+
+        # periksa keunikan username
+        if db.users.find_one({"username": username_receive}):
+            return jsonify({"result": "failure", "msg": "Username already exists."})
+
         # membuat doc untuk penyimpanan database
         doc = {
             "username": username_receive,
-            "password": password_receive,
+            "password": hash_password,
             "role": role_receive,
         }
         db.users.insert_one(doc)
