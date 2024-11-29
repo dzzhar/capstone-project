@@ -209,6 +209,12 @@ def products():
     return render_template("home/pages/products.html")
 
 
+# Rute untuk halaman produk
+@app.route("/detail_product")
+def detail_product():
+    return render_template("home/pages/detail_product.html")
+
+
 # endpoint cart
 @app.route("/cart/<username>")
 def cart(username):

@@ -410,3 +410,12 @@ footer img {
   color: #6c757d;
   z-index: 10;
 }
+
+/* Detail Product */
+.img-detail {
+  max-width: 500px;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 1rem;
+}
