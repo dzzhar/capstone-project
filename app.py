@@ -237,6 +237,20 @@ def cart(username):
         return redirect(url_for("login"))
 
 
+@app.route("/admin/dashboard")
+@admin_required
+def dashboard():
+    total_users = db.users.count_documents({})
+    total_products = db.products.count_documents({})
+    total_keuntungan = 0
+
+    # Menghitung keuntungan dari order yang sudah selesai
+    orders_done = db.orders.find({"status": "done"})
+    for order in orders_done:
+        total_keuntungan += order['total_price']  # Total harga order yang selesai
+    
+    return render_template("admin/pages/dashboard.html", total_users=total_users, total_products=total_products, total_keuntungan=total_keuntungan)
+
 # endpoint dashboard table users
 @app.route("/admin/users")
 def users_table():
@@ -426,6 +440,49 @@ def delete_product():
         # Mengirimkan respon jika produk tidak ditemukan
         return jsonify({"msg": "Produk tidak ditemukan!"}), 404
 
+
+@app.route("/admin/orders")
+@admin_required
+def orders_table():
+    orders = list(db.orders.find())
+    for order in orders:
+        order["_id"] = str(order["_id"])  # Mengubah ObjectId ke string agar bisa digunakan di template
+    return render_template("admin/pages/orders.html", orders=orders)
+
+db.orders.insert_one({
+  "product_name": "Cookies",
+  "quantity": 3,
+  "price": 20000,
+  "total_price": 60000,
+  "status": "pending"
+})
+
+# Route untuk mengupdate status order
+@app.route("/admin/order/update_status", methods=["POST"])
+def update_order_status():
+    order_id = request.form.get("order_id")
+    status = request.form.get("status")
+    
+    # Update status order
+    db.orders.update_one({"_id": ObjectId(order_id)}, {"$set": {"status": status}})
+    
+    return jsonify({"msg": "Order status updated successfully!"})
+
+@app.route('/contact_messages')
+def contact_messages():
+    # Contoh: Ambil pesan dari database
+    messages = [
+        {"name": "John Doe", "phonenumber": "1234567890098", "message": "Hello, how can I contact support?"},
+        {"name": "Jane Smith", "phonenumber": "09876543211234", "message": "Is there any update on my order?"}
+    ]
+    return render_template('admin/pages/contact_messages.html', messages=messages)
+
+@app.route('/admin/contact/delete', methods=['POST'])
+def delete_message():
+    message_id = request.form.get('id_give')
+    # Lakukan penghapusan pesan dari database atau sistem
+    # Berikan response sukses setelah penghapusan
+    return jsonify(msg="Message deleted successfully!")
 
 # Jalankan aplikasi
 if __name__ == "__main__":
