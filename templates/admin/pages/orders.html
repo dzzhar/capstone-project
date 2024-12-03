@@ -1,0 +1,111 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Orders Table | By.Notti{% endblock %}
+
+{% block content %}
+<!-- Menambahkan CSS untuk status dot -->
+<style>
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .status-dot.pending {
+    background-color: blue;
+  }
+
+  .status-dot.on-process {
+    background-color: yellow;
+  }
+
+  .status-dot.done {
+    background-color: green;
+  }
+</style>
+
+<div class="container-fluid">
+  <h4 class="mb-2 mb-4">Orders Table</h4>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold text-primary">Orders</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th class="align-middle">No.</th>
+              <th class="align-middle">Nama Products</th>
+              <th class="align-middle">Quantity</th>
+              <th class="align-middle">Harga</th>
+              <th class="align-middle">Total Harga</th>
+              <th class="align-middle">Category</th>
+              <th class="align-middle">Status</th>
+              <th class="align-middle">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ order.product_name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.price }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>{{ order.category }}</td>
+                <td id="status-{{ order._id }}">
+                  <span class="status-dot {% if order.status == 'pending' %}pending{% elif order.status == 'on process' %}on-process{% else %}done{% endif %}"></span>
+                  {{ order.status }}
+                </td>
+                <td>
+                  <select 
+                    class="form-select form-select-sm"
+                    onchange="updateOrderStatus('{{ order._id }}', this.value)">
+                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="on process" {% if order.status == 'on process' %}selected{% endif %}>On Process</option>
+                    <option value="done" {% if order.status == 'done' %}selected{% endif %}>Done</option>
+                  </select>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>          
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+ function updateOrderStatus(orderId, status) {
+    $.ajax({
+      type: "POST",
+      url: "/admin/order/update_status",
+      data: {order_id: orderId, status: status},
+      success: function(response) {
+        alert(response.msg); 
+        document.getElementById(`status-${orderId}`).innerText = status;
+        const statusDot = document.querySelector(`#status-${orderId} .status-dot`);
+        statusDot.classList.remove("pending", "on-process", "done");
+        if (status === 'pending') {
+          statusDot.classList.add("pending");
+        } else if (status === 'on process') {
+          statusDot.classList.add("on-process");
+        } else if (status === 'done') {
+          statusDot.classList.add("done");
+        }
+
+        
+        location.reload();  
+      },
+      error: function(error) {
+        alert('Error updating order status');
+      }
+    });
+}
+</script>
+{% endblock %}
