@@ -207,6 +207,10 @@ section {
   color: #d3d4d5;
 }
 
+.testi-img {
+  width: 12.5rem;
+}
+
 /* Cards */
 .card {
   border-radius: 50rem 50rem 5rem 5rem;

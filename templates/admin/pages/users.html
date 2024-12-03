@@ -44,11 +44,9 @@
             {% for user in users %}
 
             <!-- set data -->
-            {% set number = loop.index %} 
-            {% set id = user._id %} 
-            {% set username = user.username %} 
-            {% set password = user.password %} 
-            {% set role = user.role %}
+            {% set number = loop.index %} {% set id = user._id %} {% set
+            username = user.username %} {% set password = user.password %} {%
+            set role = user.role %}
 
             <tr>
               <td class="align-middle">{{number}}</td>
@@ -113,15 +111,19 @@
     });
   }
   <div class="d-flex justify-content-end">
-    <a href="javascript:void(0)" class="btn btn-danger" onclick="confirmLogout()">Logout</a>
-</div>
+    <a
+      href="javascript:void(0)"
+      class="btn btn-danger"
+      onclick="confirmLogout()"
+    >
+      Logout
+    </a>
+  </div>;
 
-function confirmLogout() {
+  function confirmLogout() {
     if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "/logout";
+      window.location.href = "/logout";
     }
-}
-
-
+  }
 </script>
 {% endblock %}

@@ -44,25 +44,23 @@
           <tbody>
             {% for product in products %}
             <!-- set data -->
-            {% set number = loop.index %}
-            {% set id = product._id %}
-            {% set product_name = product.product_name %}
-            {% set price = product.price %}
-            {% set category = product.category %}
-            {% set image = product.image %}
+            {% set number = loop.index %} {% set id = product._id %} {% set
+            product_name = product.product_name %} {% set price = product.price
+            %} {% set category = product.category %} {% set image =
+            product.image %}
 
             <tr>
               <td class="align-middle">{{number}}</td>
               <td class="align-middle">{{product_name}}</td>
               <td class="align-middle">
                 {% if image %}
-                <img src="{{ url_for('static', filename='images/' ~ image) }}" 
-                     alt="{{ product_name }}" 
-                     class="object-fit-cover" 
-                     style="width: 100px; height: 100px;">
-                {% else %}
-                No Image
-                {% endif %}
+                <img
+                  src="{{ url_for('static', filename='images/' ~ image) }}"
+                  alt="{{ product_name }}"
+                  class="object-fit-cover"
+                  style="width: 100px; height: 100px"
+                />
+                {% else %} No Image {% endif %}
               </td>
               <td class="align-middle">Rp. {{ price }}</td>
               <td class="align-middle">{{ category }}</td>

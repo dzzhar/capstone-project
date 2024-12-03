@@ -2,13 +2,21 @@ import hashlib
 import locale
 import os
 from datetime import datetime, timedelta
+from functools import wraps
 from os.path import dirname, join
 
 import jwt
-from functools import wraps
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for, make_response
+from flask import (
+    Flask,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
@@ -24,9 +32,6 @@ client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
 app = Flask(__name__)
-
-# set local ke Indonesia
-locale.setlocale(locale.LC_ALL, "id_ID.UTF-8")
 
 
 # Konfigurasi untuk folder upload
@@ -46,40 +51,32 @@ def allowed_file(filename):
 # Rute untuk halaman utama
 @app.route("/")
 def home():
-    # menyimpan token kedalam mytoken
+    # menyimpan token ke dalam mytoken
     token_receive = request.cookies.get("mytoken")
     user_info = None
     is_logged_in = False
+
+    reviews = db.reviews.find({}, {"_id": False})
 
     if token_receive:
         try:
             # menggunakan jwt.decode untuk decode token
             payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
             user_info = db.users.find_one({"username": payload["id"]})
-
-            # Jika token valid, render halaman home dengan status login
-            return render_template(
-                "home/pages/home.html", is_logged_in=True, user_info=user_info
-            )
-
-        # jika token kadaluarsa
+            is_logged_in = True  # Tandai pengguna sebagai login
         except jwt.ExpiredSignatureError:
-            # render ke halaman awal dengan status tidak login
-            return render_template(
-                "home/pages/login.html", is_logged_in=False, user_info=None
-            )
-
-        # jika token tidak valid
+            pass
         except jwt.exceptions.DecodeError:
-            # render ke halaman awal dengan status tidak login
-            return render_template(
-                "home/pages/login.html", is_logged_in=False, user_info=None
-            )
+            # Abaikan token tidak valid, tetap anggap pengguna tidak login
+            pass
 
-    else:
-        return render_template(
-            "home/pages/home.html", is_logged_in=is_logged_in, user_info=user_info
-        )
+    # Render halaman utama dengan informasi login (jika ada)
+    return render_template(
+        "home/pages/home.html",
+        is_logged_in=is_logged_in,
+        user_info=user_info,
+        reviews=reviews,
+    )
 
 
 # endpoint register
@@ -125,7 +122,6 @@ def login():
             {"username": username_receive, "password": hash_password}
         )
 
-       
         if user:
             # membuat payload untuk token JWT
             payload = {
@@ -145,6 +141,7 @@ def login():
 
     return render_template("home/pages/login.html")
 
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -152,7 +149,7 @@ def admin_required(f):
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             if data.get("role") != "admin":
-                return redirect("/")  
+                return redirect("/")
         except jwt.ExpiredSignatureError:
             return redirect("/login")
         except jwt.InvalidTokenError:
@@ -161,12 +158,12 @@ def admin_required(f):
 
     return decorated_function
 
-@app.route("/admin/users")
-@admin_required  
-def admin_users():
-    users = list(db.users.find({})) 
-    return render_template("admin/pages/users.html", users=users)
 
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    users = list(db.users.find({}))
+    return render_template("admin/pages/users.html", users=users)
 
 
 # endpoint logout
@@ -178,20 +175,6 @@ def logout():
     response.set_cookie("mytoken", "", expires=0)
     return response
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get("mytoken")
-        if not token:
-            return redirect("/login")
-        try:
-            jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            return redirect("/login")
-        except jwt.InvalidTokenError:
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
 
 # endpoint logout admin
 @app.route("/logout", methods=["GET"])
