@@ -14,6 +14,11 @@
                            value="{{ product.product_name }}" required>
                 </div>
                 <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="description" name="description" 
+                           value="{{ product.description }}" required>
+                </div>
+                <div class="mb-3">
                     <label for="price" class="form-label">Price</label>
                     <input type="number" class="form-control" id="price" name="price" 
                            value="{{ product.price }}" required>

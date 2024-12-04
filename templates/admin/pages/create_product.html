@@ -47,6 +47,23 @@
           >
         </div>
         <div class="form-group">
+          <label for="description" class="form-control-label"
+            >Description</label
+          >
+          <input
+            class="form-control"
+            type="text"
+            id="description"
+            placeholder="Description"
+          />
+          <small
+            id="descriptionErrorMessage"
+            class="form-text text-danger d-none"
+            ><i class="fas fa-exclamation-circle me-2"></i>Description cannot be
+            empty.</small
+          >
+        </div>
+        <div class="form-group">
           <label for="price" class="form-control-label">Price</label>
           <input
             class="form-control"
@@ -101,6 +118,12 @@
       }
     });
 
+    $("#description").on("input", function () {
+      if ($(this).val()) {
+        $("#descriptionErrorMessage").addClass("d-none");
+      }
+    });
+
     $("#price").on("input", function () {
       if ($(this).val()) {
         $("#priceErrorMessage").addClass("d-none");
@@ -122,6 +145,7 @@
 
   function create_product() {
     let product_name = $("#product_name").val();
+    let description = $("#description").val();
     let price = $("#price").val();
     let category = $("#category").val();
     let image = $("#image")[0].files[0];
@@ -130,6 +154,9 @@
     if (!product_name || !price || !category) {
       if (!product_name) {
         $("#product_nameErrorMessage").removeClass("d-none");
+      }
+      if (!description) {
+        $("#descriptionErrorMessage").removeClass("d-none");
       }
       if (!price) {
         $("#priceErrorMessage").removeClass("d-none");
@@ -146,6 +173,7 @@
     // Create FormData for sending via AJAX
     let formData = new FormData();
     formData.append("product_name", product_name);
+    formData.append("description", description);
     formData.append("price", price);
     formData.append("category", category);
     if (image) {

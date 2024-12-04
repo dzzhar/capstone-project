@@ -8,12 +8,11 @@
     <i class="fa fa-bars"></i>
   </button>
   <nav>
-    <ul>
-      <li>
-        <a href="/logout" class="text-primary">
-          <i class="fa-solid fa-arrow-right-from-bracket fa-lg"></i>
-        </a>
-      </li>
-    </ul>
-</nav>
+    <a href="{{url_for('logout')}}" class="btn btn-light btn-lg btn-primary">
+      <span class="d-flex align-items-center">
+        <span class="small fw-bold">Logout</span>
+        <i class="fa-solid fa-arrow-right-from-bracket fa-lg ms-2"></i>
+      </span>
+    </a>
+  </nav>
 </nav>

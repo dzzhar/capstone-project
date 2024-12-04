@@ -579,7 +579,7 @@ a.btn.disabled {
 }
 
 .btn-link:hover {
-  color: #224abe;
+  color: #2a5a94;
   text-decoration: underline;
 }
 
@@ -933,6 +933,10 @@ a.btn.disabled {
   background-color: #f8f9fc !important;
 }
 
+.bg-opacity-primary {
+  background-color: rgba(32, 64, 115, 0.1) !important;
+}
+
 a.bg-light:hover,
 a.bg-light:focus,
 button.bg-light:hover,
@@ -950,7 +954,7 @@ button.bg-light:focus {
 
 a.text-primary:hover,
 a.text-primary:focus {
-  color: #224abe !important;
+  color: #2a5a94 !important;
 }
 
 .text-white-50 {

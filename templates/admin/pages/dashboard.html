@@ -1,55 +1,82 @@
-{% extends 'admin/base.html' %}
-
-{% block title %}Dashboard | By.Notti{% endblock %}
-
-{% block content %}
+{% extends 'admin/base.html' %} {% block title %}Dashboard | By.Notti{% endblock
+%} {% block content %}
 <div class="container-fluid">
   <h4 class="mb-4">Dashboard</h4>
 
   <div class="row">
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card shadow-sm h-100 p-2 rounded-3 bg-opacity-primary">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
+              <div class="h5 text-xs text-primary fw-bold mb-2">
+                Total Users
+              </div>
+              <div class="h5 mb-0 fw-bold text-gray-800">{{ total_users }}</div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-users fa-2x text-gray-300"></i>
+              <i class="fas fa-users fa-2x text-primary"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div
+        class="card shadow-sm h-100 p-2 rounded-3 bg-warning p-2 text-dark bg-opacity-10"
+      >
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Products</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_products }}</div>
+              <div class="h5 text-xs text-warning fw-bold mb-2">
+                Total Product
+              </div>
+              <div class="h5 mb-0 fw-bold text-gray-800">
+                {{ total_products }}
+              </div>
             </div>
             <div class="col-auto">
-              <!-- Replaced box icon with cake icon -->
-              <i class="fas fa-cake fa-2x text-gray-300"></i> <!-- Cake icon added -->
+              <i class="fas fa-boxes fa-2x text-warning"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-warning shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div
+        class="card shadow-sm h-100 p-2 rounded-3 bg-danger p-2 text-dark bg-opacity-10"
+      >
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Keuntungan</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">Rp. {{ total_keuntungan }}</div>
+              <div class="h5 text-xs text-danger fw-bold mb-2">
+                Total Orders
+              </div>
+              <div class="h5 mb-0 fw-bold text-gray-800">{{ total_users }}</div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-coins fa-2x text-gray-300"></i>
+              <i class="fas fa-cart-shopping fa-2x text-danger"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div
+        class="card shadow-sm h-100 p-2 rounded-3 bg-success p-2 text-dark bg-opacity-10"
+      >
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="h5 text-xs text-success fw-bold mb-2">
+                Total Keuntungan
+              </div>
+              <div class="h5 mb-0 fw-bold text-gray-800">
+                {{ total_keuntungan | format_idr}}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-coins fa-2x text-success"></i>
             </div>
           </div>
         </div>

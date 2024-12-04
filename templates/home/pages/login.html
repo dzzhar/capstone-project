@@ -166,48 +166,47 @@
       });
 
       function login() {
-    let username = $("#username").val();
-    let password = $("#password").val();
+        let username = $("#username").val();
+        let password = $("#password").val();
 
-    // Validasi input kosong
-    if (!username || !password) {
-        if (!username) {
+        // Validasi input kosong
+        if (!username || !password) {
+          if (!username) {
             $("#usernameErrorMessage").removeClass("d-none");
-        }
-        if (!password) {
+          }
+          if (!password) {
             $("#passwordErrorMessage").removeClass("d-none");
+          }
+          return;
         }
-        return;
-    }
 
-    $.ajax({
-        type: "POST",
-        url: "/login",
-        data: {
+        $.ajax({
+          type: "POST",
+          url: "/login",
+          data: {
             username_give: username,
             password_give: password,
-        },
-        success: function (response) {
+          },
+          success: function (response) {
             if (response.result === "success") {
-                $.cookie("mytoken", response["token"], { path: "/" });
+              $.cookie("mytoken", response["token"], { path: "/" });
 
-                // Simpan role pengguna di localStorage
-                localStorage.setItem("role", response["role"]);
+              // Simpan role pengguna di localStorage
+              localStorage.setItem("role", response["role"]);
 
-                // Arahkan ke halaman sesuai role
-                if (response["role"] === "admin") {
-                    window.location.replace("/admin/users");
-                } else {
-                    window.location.replace("/");
-                }
+              // Arahkan ke halaman sesuai role
+              if (response["role"] === "admin") {
+                window.location.replace("/admin");
+              } else {
+                window.location.replace("/");
+              }
             } else {
-                $("#usernameErrorMessage").removeClass("d-none");
-                $("#usernameErrorMessage .usernameErrorText").text(response.msg);
+              $("#usernameErrorMessage").removeClass("d-none");
+              $("#usernameErrorMessage .usernameErrorText").text(response.msg);
             }
-        },
-    });
-}
-
+          },
+        });
+      }
     </script>
 
     <!-- Bootstrap core JS -->

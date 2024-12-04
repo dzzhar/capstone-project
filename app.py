@@ -1,5 +1,4 @@
 import hashlib
-import locale
 import os
 from datetime import datetime, timedelta
 from functools import wraps
@@ -8,15 +7,7 @@ from os.path import dirname, join
 import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import (
-    Flask,
-    jsonify,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
@@ -46,6 +37,16 @@ def allowed_file(filename):
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
     )
+
+
+# format rupiah
+def format_idr(value):
+    # Ensure value is treated as a number (float or int)
+    value = float(value)
+    return f"Rp. {value:,.0f}".replace(",", ".")
+
+
+app.jinja_env.filters["format_idr"] = format_idr
 
 
 # Rute untuk halaman utama
@@ -142,44 +143,12 @@ def login():
     return render_template("home/pages/login.html")
 
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get("mytoken")
-        try:
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            if data.get("role") != "admin":
-                return redirect("/")
-        except jwt.ExpiredSignatureError:
-            return redirect("/login")
-        except jwt.InvalidTokenError:
-            return redirect("/login")
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
-@app.route("/admin/users")
-@admin_required
-def admin_users():
-    users = list(db.users.find({}))
-    return render_template("admin/pages/users.html", users=users)
-
-
 # endpoint logout
 @app.route("/logout")
 def logout():
     response = redirect(url_for("login"))
 
     # menghapus cookies
-    response.set_cookie("mytoken", "", expires=0)
-    return response
-
-
-# endpoint logout admin
-@app.route("/logout", methods=["GET"])
-def perform_logout():
-    response = make_response(redirect("/login"))
     response.set_cookie("mytoken", "", expires=0)
     return response
 
@@ -224,7 +193,28 @@ def cart(username):
         return redirect(url_for("login"))
 
 
-@app.route("/admin/dashboard")
+""" ------ DASHBOARD ADMIN SECTION ------ """
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get("mytoken")
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            if data.get("role") != "admin":
+                return redirect("/")
+        except jwt.ExpiredSignatureError:
+            return redirect("/login")
+        except jwt.InvalidTokenError:
+            return redirect("/login")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+# endpoint dashboard
+@app.route("/admin")
 @admin_required
 def dashboard():
     total_users = db.users.count_documents({})
@@ -234,12 +224,19 @@ def dashboard():
     # Menghitung keuntungan dari order yang sudah selesai
     orders_done = db.orders.find({"status": "done"})
     for order in orders_done:
-        total_keuntungan += order['total_price']  # Total harga order yang selesai
-    
-    return render_template("admin/pages/dashboard.html", total_users=total_users, total_products=total_products, total_keuntungan=total_keuntungan)
+        total_keuntungan += order["total_price"]  # Total harga order yang selesai
+
+    return render_template(
+        "admin/pages/dashboard.html",
+        total_users=total_users,
+        total_products=total_products,
+        total_keuntungan=total_keuntungan,
+    )
+
 
 # endpoint dashboard table users
 @app.route("/admin/users")
+@admin_required
 def users_table():
     # mengambil semua data users
     users_list = list(db.users.find({}))
@@ -338,6 +335,7 @@ def create_product():
     if request.method == "POST":
         # Mengambil data dari form
         product_name = request.form["product_name"]
+        description = request.form["description"]
         price = request.form["price"]
         category = request.form["category"]
         image = request.files["image"]
@@ -355,6 +353,7 @@ def create_product():
         # Menyimpan produk ke database
         new_product = {
             "product_name": product_name,
+            "description": description,
             "price": int(price),
             "category": category,
             "image": image_filename,
@@ -390,6 +389,7 @@ def edit_product(product_id):
     if request.method == "POST":
         # Ambil data dari form
         product_name = request.form["product_name"]
+        description = request.form["description"]
         price = request.form["price"]
         category = request.form["category"]
         image = request.files["image"]
@@ -401,6 +401,7 @@ def edit_product(product_id):
         # Menyiapkan data untuk update produk
         update_data = {
             "product_name": product_name,
+            "description": description,
             "price": int(price),
             "category": category,
         }
@@ -434,48 +435,57 @@ def delete_product():
         return jsonify({"msg": "Produk tidak ditemukan!"}), 404
 
 
+# endpoint orders table
 @app.route("/admin/orders")
 @admin_required
 def orders_table():
     orders = list(db.orders.find())
+
     for order in orders:
-        order["_id"] = str(order["_id"])  # Mengubah ObjectId ke string agar bisa digunakan di template
+        order["_id"] = str(
+            order["_id"]
+        )  # Mengubah ObjectId ke string agar bisa digunakan di template
     return render_template("admin/pages/orders.html", orders=orders)
 
-db.orders.insert_one({
-  "product_name": "Cookies",
-  "quantity": 3,
-  "price": 20000,
-  "total_price": 60000,
-  "status": "pending"
-})
 
 # Route untuk mengupdate status order
 @app.route("/admin/order/update_status", methods=["POST"])
 def update_order_status():
     order_id = request.form.get("order_id")
     status = request.form.get("status")
-    
+
     # Update status order
     db.orders.update_one({"_id": ObjectId(order_id)}, {"$set": {"status": status}})
-    
+
     return jsonify({"msg": "Order status updated successfully!"})
 
-@app.route('/contact_messages')
+
+# endpoint contact table
+@app.route("/contact_messages")
 def contact_messages():
     # Contoh: Ambil pesan dari database
     messages = [
-        {"name": "John Doe", "phonenumber": "1234567890098", "message": "Hello, how can I contact support?"},
-        {"name": "Jane Smith", "phonenumber": "09876543211234", "message": "Is there any update on my order?"}
+        {
+            "name": "John Doe",
+            "phonenumber": "1234567890098",
+            "message": "Hello, how can I contact support?",
+        },
+        {
+            "name": "Jane Smith",
+            "phonenumber": "09876543211234",
+            "message": "Is there any update on my order?",
+        },
     ]
-    return render_template('admin/pages/contact_messages.html', messages=messages)
+    return render_template("admin/pages/contact_messages.html", messages=messages)
 
-@app.route('/admin/contact/delete', methods=['POST'])
+
+@app.route("/admin/contact/delete", methods=["POST"])
 def delete_message():
-    message_id = request.form.get('id_give')
+    message_id = request.form.get("id_give")
     # Lakukan penghapusan pesan dari database atau sistem
     # Berikan response sukses setelah penghapusan
     return jsonify(msg="Message deleted successfully!")
+
 
 # Jalankan aplikasi
 if __name__ == "__main__":
