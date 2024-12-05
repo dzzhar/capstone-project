@@ -34,6 +34,7 @@
             <tr>
               <th class="align-middle">No.</th>
               <th class="align-middle">Product Name</th>
+              <th class="align-middle">Description</th>
               <th class="align-middle">Image Product</th>
               <th class="align-middle">Price</th>
               <th class="align-middle">Category</th>
@@ -44,27 +45,26 @@
           <tbody>
             {% for product in products %}
             <!-- set data -->
-            {% set number = loop.index %}
-            {% set id = product._id %}
-            {% set product_name = product.product_name %}
-            {% set price = product.price %}
-            {% set category = product.category %}
-            {% set image = product.image %}
+            {% set number = loop.index %} {% set id = product._id %} {% set
+            product_name = product.product_name %} {% set description =
+            product.description %} {% set price = product.price %} {% set
+            category = product.category %} {% set image = product.image %}
 
             <tr>
               <td class="align-middle">{{number}}</td>
-              <td class="align-middle">{{product_name}}</td>
+              <td class="align-middle text-capitalize">{{product_name}}</td>
+              <td class="align-middle">{{description}}</td>
               <td class="align-middle">
                 {% if image %}
-                <img src="{{ url_for('static', filename='images/' ~ image) }}" 
-                     alt="{{ product_name }}" 
-                     class="object-fit-cover" 
-                     style="width: 100px; height: 100px;">
-                {% else %}
-                No Image
-                {% endif %}
+                <img
+                  src="{{ url_for('static', filename='images/' ~ image) }}"
+                  alt="{{ product_name }}"
+                  class="object-fit-cover"
+                  style="width: 100px; height: 100px"
+                />
+                {% else %} No Image {% endif %}
               </td>
-              <td class="align-middle">Rp. {{ price }}</td>
+              <td class="align-middle">{{ price | format_idr }}</td>
               <td class="align-middle">{{ category }}</td>
               <td class="align-middle">
                 <div class="d-flex flex-column flex-lg-row gap-1">

@@ -1,0 +1,89 @@
+{% extends 'admin/base.html' %}
+
+<!-- title -->
+{% block title %}Orders Table | By.Notti{% endblock %}
+
+<!-- content -->
+{% block content %}
+<div class="container-fluid">
+  <h4 class="mb-2 mb-4">Orders Table</h4>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 fw-bold text-primary">Orders</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th class="align-middle">No.</th>
+              <th class="align-middle">Products Name</th>
+              <th class="align-middle">Customer</th>
+              <th class="align-middle">Purchased On</th>
+              <th class="align-middle">Quantity</th>
+              <th class="align-middle">Total Price</th>
+              <th class="align-middle">Status</th>
+              <th class="align-middle">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ order.product_name }}</td>
+              <td>{{ order.quantity }}</td>
+              <td>{{ order.price | format_idr }}</td>
+              <td>{{ order.total_price }}</td>
+              <td>{{ order.category }}</td>
+              <td id="status-{{ order._id }}">
+                <span
+                  class="badge text-capitalize {% if order.status == 'pending' %}bg-warning{% elif order.status == 'on process' %}bg-primary{% elif order.status == 'done' %}bg-success{% endif %}"
+                >
+                  {{ order.status }}
+                </span>
+              </td>
+              <td>
+                <select
+                  class="form-select form-select-sm"
+                  onchange="updateOrderStatus('{{ order._id }}', this.value)"
+                >
+                  <option value="pending" {% if order.status == 'pending' %} selected{% endif %}>Pending</option>
+                  <option value="on process" {% if order.status == 'on process' %}selected{% endif %}>On Process</option>
+                  <option value="done" {% if order.status == 'done' %}selected{% endif %}>Done</option>
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateOrderStatus(orderId, status) {
+    $.ajax({
+      type: "POST",
+      url: "/admin/order/update_status",
+      data: { order_id: orderId, status: status },
+      success: function (response) {
+        // Update badge dynamically
+        const statusCell = document.getElementById(`status-${orderId}`);
+        statusCell.innerHTML = `<span class="badge ${
+          status === "pending"
+            ? "bg-warning"
+            : status === "on process"
+            ? "bg-primary"
+            : "bg-success"
+        }">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+      },
+      error: function (error) {
+        alert("Error updating order status");
+      },
+    });
+  }
+</script>
+{% endblock %}

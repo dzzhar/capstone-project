@@ -1,13 +1,13 @@
 import hashlib
 import os
 from datetime import datetime, timedelta
+from functools import wraps
 from os.path import dirname, join
 
 import jwt
-from functools import wraps
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for, make_response
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
@@ -17,13 +17,13 @@ load_dotenv(dotenv_path)
 
 MONGODB_URI = os.environ.get("MONGODB_URI")
 DB_NAME = os.environ.get("DB_NAME")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
-SECRET_KEY = "SPARTA"
-
 app = Flask(__name__)
+
 
 # Konfigurasi untuk folder upload
 UPLOAD_FOLDER = "static/images"
@@ -39,43 +39,45 @@ def allowed_file(filename):
     )
 
 
+# format rupiah
+def format_idr(value):
+    # Ensure value is treated as a number (float or int)
+    value = float(value)
+    return f"Rp. {value:,.0f}".replace(",", ".")
+
+
+app.jinja_env.filters["format_idr"] = format_idr
+
+
 # Rute untuk halaman utama
 @app.route("/")
 def home():
-    # menyimpan token kedalam mytoken
+    # menyimpan token ke dalam mytoken
     token_receive = request.cookies.get("mytoken")
     user_info = None
     is_logged_in = False
+
+    reviews = db.reviews.find({}, {"_id": False})
 
     if token_receive:
         try:
             # menggunakan jwt.decode untuk decode token
             payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
             user_info = db.users.find_one({"username": payload["id"]})
-
-            # Jika token valid, render halaman home dengan status login
-            return render_template(
-                "home/pages/home.html", is_logged_in=True, user_info=user_info
-            )
-
-        # jika token kadaluarsa
+            is_logged_in = True  # Tandai pengguna sebagai login
         except jwt.ExpiredSignatureError:
-            # render ke halaman awal dengan status tidak login
-            return render_template(
-                "home/pages/login.html", is_logged_in=False, user_info=None
-            )
-
-        # jika token tidak valid
+            pass
         except jwt.exceptions.DecodeError:
-            # render ke halaman awal dengan status tidak login
-            return render_template(
-                "home/pages/login.html", is_logged_in=False, user_info=None
-            )
+            # Abaikan token tidak valid, tetap anggap pengguna tidak login
+            pass
 
-    else:
-        return render_template(
-            "home/pages/home.html", is_logged_in=is_logged_in, user_info=user_info
-        )
+    # Render halaman utama dengan informasi login (jika ada)
+    return render_template(
+        "home/pages/home.html",
+        is_logged_in=is_logged_in,
+        user_info=user_info,
+        reviews=reviews,
+    )
 
 
 # endpoint register
@@ -121,7 +123,6 @@ def login():
             {"username": username_receive, "password": hash_password}
         )
 
-       
         if user:
             # membuat payload untuk token JWT
             payload = {
@@ -141,29 +142,6 @@ def login():
 
     return render_template("home/pages/login.html")
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get("mytoken")
-        try:
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            if data.get("role") != "admin":
-                return redirect("/")  
-        except jwt.ExpiredSignatureError:
-            return redirect("/login")
-        except jwt.InvalidTokenError:
-            return redirect("/login")
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-@app.route("/admin/users")
-@admin_required  
-def admin_users():
-    users = list(db.users.find({})) 
-    return render_template("admin/pages/users.html", users=users)
-
-
 
 # endpoint logout
 @app.route("/logout")
@@ -171,28 +149,6 @@ def logout():
     response = redirect(url_for("login"))
 
     # menghapus cookies
-    response.set_cookie("mytoken", "", expires=0)
-    return response
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.cookies.get("mytoken")
-        if not token:
-            return redirect("/login")
-        try:
-            jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            return redirect("/login")
-        except jwt.InvalidTokenError:
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
-
-# endpoint logout admin
-@app.route("/logout", methods=["GET"])
-def perform_logout():
-    response = make_response(redirect("/login"))
     response.set_cookie("mytoken", "", expires=0)
     return response
 
@@ -206,7 +162,10 @@ def contact():
 # Rute untuk halaman produk
 @app.route("/products")
 def products():
-    return render_template("home/pages/products.html")
+    products = db.products.find({})
+
+    return render_template("home/pages/products.html", products=products)
+
 
 
 # Rute untuk halaman produk
@@ -256,8 +215,50 @@ def add_to_cart():
 
 
 
+""" ------ DASHBOARD ADMIN SECTION ------ """
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get("mytoken")
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            if data.get("role") != "admin":
+                return redirect("/")
+        except jwt.ExpiredSignatureError:
+            return redirect("/login")
+        except jwt.InvalidTokenError:
+            return redirect("/login")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+# endpoint dashboard
+@app.route("/admin")
+@admin_required
+def dashboard():
+    total_users = db.users.count_documents({})
+    total_products = db.products.count_documents({})
+    total_keuntungan = 0
+
+    # Menghitung keuntungan dari order yang sudah selesai
+    orders_done = db.orders.find({"status": "done"})
+    for order in orders_done:
+        total_keuntungan += order["total_price"]  # Total harga order yang selesai
+
+    return render_template(
+        "admin/pages/dashboard.html",
+        total_users=total_users,
+        total_products=total_products,
+        total_keuntungan=total_keuntungan,
+    )
+
+
 # endpoint dashboard table users
 @app.route("/admin/users")
+@admin_required
 def users_table():
     # mengambil semua data users
     users_list = list(db.users.find({}))
@@ -268,6 +269,7 @@ def users_table():
 
 # endpoint dashboard create users
 @app.route("/admin/user/create", methods=["GET", "POST"])
+@admin_required
 def create_user():
     # permintaan menggunakan method POST
     if request.method == "POST":
@@ -276,10 +278,16 @@ def create_user():
         password_receive = request.form["password_give"]
         role_receive = request.form["role_give"]
 
+        hash_password = hashlib.sha256(password_receive.encode("utf-8")).hexdigest()
+
+        # periksa keunikan username
+        if db.users.find_one({"username": username_receive}):
+            return jsonify({"result": "failure", "msg": "Username already exists."})
+
         # membuat doc untuk penyimpanan database
         doc = {
             "username": username_receive,
-            "password": password_receive,
+            "password": hash_password,
             "role": role_receive,
         }
         db.users.insert_one(doc)
@@ -337,6 +345,7 @@ def delete_user():
 
 # endpoint dashboard table products
 @app.route("/admin/products")
+@admin_required
 def products_table():
     products = list(db.products.find())
     for product in products:
@@ -346,10 +355,12 @@ def products_table():
 
 # endpoint dashboard create products
 @app.route("/admin/products/create", methods=["GET", "POST"])
+@admin_required
 def create_product():
     if request.method == "POST":
         # Mengambil data dari form
         product_name = request.form["product_name"]
+        description = request.form["description"]
         price = request.form["price"]
         category = request.form["category"]
         image = request.files["image"]
@@ -367,6 +378,7 @@ def create_product():
         # Menyimpan produk ke database
         new_product = {
             "product_name": product_name,
+            "description": description,
             "price": int(price),
             "category": category,
             "image": image_filename,
@@ -402,6 +414,7 @@ def edit_product(product_id):
     if request.method == "POST":
         # Ambil data dari form
         product_name = request.form["product_name"]
+        description = request.form["description"]
         price = request.form["price"]
         category = request.form["category"]
         image = request.files["image"]
@@ -413,6 +426,7 @@ def edit_product(product_id):
         # Menyiapkan data untuk update produk
         update_data = {
             "product_name": product_name,
+            "description": description,
             "price": int(price),
             "category": category,
         }
@@ -445,6 +459,30 @@ def delete_product():
         # Mengirimkan respon jika produk tidak ditemukan
         return jsonify({"msg": "Produk tidak ditemukan!"}), 404
 
+
+# endpoint orders table
+@app.route("/admin/orders")
+@admin_required
+def orders_table():
+    orders = list(db.orders.find())
+
+    for order in orders:
+        order["_id"] = str(
+            order["_id"]
+        )  # Mengubah ObjectId ke string agar bisa digunakan di template
+    return render_template("admin/pages/orders.html", orders=orders)
+
+
+# Route untuk mengupdate status order
+@app.route("/admin/order/update_status", methods=["POST"])
+def update_order_status():
+    order_id = request.form.get("order_id")
+    status = request.form.get("status")
+
+    # Update status order
+    db.orders.update_one({"_id": ObjectId(order_id)}, {"$set": {"status": status}})
+
+    return jsonify({"msg": "Order status updated successfully!"})
 
 # Jalankan aplikasi
 if __name__ == "__main__":

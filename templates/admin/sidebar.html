@@ -1,13 +1,16 @@
-<ul
-  class="navbar-nav bg-primary sidebar sidebar-dark accordion"
-  id="accordionSidebar"
->
+<ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
   <div class="sidebar-brand d-flex align-items-center justify-content-center">
     <div class="sidebar-brand-icon">
       <img src="{{url_for('static', filename='images/icon_blue.png')}}" alt="logo admin" class="img-sidebar" />
     </div>
     <div class="sidebar-brand-text mx-3">By.Notti</div>
   </div>
+  <li class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+    <a class="nav-link" href="{{url_for('dashboard')}}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Dashboard</span>
+    </a>
+  </li>
   <hr class="sidebar-divider my-0" />
   <div class="sidebar-heading mt-3">Table</div>
   <li class="nav-item {% if request.endpoint == 'users_table' %}active{% endif %}">
@@ -20,6 +23,12 @@
     <a class="nav-link" href="{{url_for('products_table')}}">
       <i class="fas fa-fw fa-box"></i>
       <span>Products</span>
+    </a>
+  </li>
+  <li class="nav-item {% if request.endpoint == 'orders_table' %}active{% endif %}">
+    <a class="nav-link" href="{{url_for('orders_table')}}">
+      <i class="fas fa-fw fa-shopping-cart"></i>
+      <span>Orders</span>
     </a>
   </li>
   <hr class="sidebar-divider" />

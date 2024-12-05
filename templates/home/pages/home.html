@@ -1,7 +1,9 @@
 {% extends 'home/base.html' %}
 
+<!-- title -->
 {% block title %}Home | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
 <div class="p-4 p-md-0">
   <!-- Hero Section-->
@@ -16,9 +18,12 @@
               tradition, craftsmanship, and pure indulgence.
             </p>
             <div class="d-flex flex-column flex-lg-row align-items-center">
-              <button class="btn btn-primary btn-lg rounded-pill fw-bold px-4">
+              <a
+                href="{{url_for('products')}}"
+                class="btn btn-primary btn-lg rounded-pill fw-bold px-4"
+              >
                 Discover Menu
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -48,16 +53,19 @@
         </div>
 
         <div class="col-12 col-lg-4 text-lg-end">
-          <button class="btn btn-light btn-lg rounded-pill fw-bold px-4">
+          <a
+            href="{{url_for('products')}}"
+            class="btn btn-light btn-lg rounded-pill fw-bold px-4"
+          >
             Explore All
-          </button>
+          </a>
         </div>
       </div>
 
       <div class="d-flex flex-column flex-md-row gap-5 gap-md-3 gap-lg-5">
         <div class="card flex-grow-1">
           <img
-          loading="lazy"
+            loading="lazy"
             src="{{ url_for('static', filename='images/best-seller1.png') }}"
             class="card-img"
             alt="best-seller1"
@@ -65,7 +73,7 @@
         </div>
         <div class="card flex-grow-1">
           <img
-          loading="lazy"
+            loading="lazy"
             src="{{ url_for('static', filename='images/best-seller2.png') }}"
             class="card-img"
             alt="best-seller2"
@@ -73,7 +81,7 @@
         </div>
         <div class="card flex-grow-1">
           <img
-          loading="lazy"
+            loading="lazy"
             src="{{ url_for('static', filename='images/best-seller3.png') }}"
             class="card-img"
             alt="best-seller3"
@@ -127,66 +135,40 @@
         data-bs-ride="carousel"
       >
         <div class="carousel-inner">
-          <div class="carousel-item active">
+          {% for review in reviews %}
+
+          <!-- define data -->
+          {% set link = review.review_link %} {% set image =
+          review.author_image%} {% set author = review.author_title %} {% set
+          rating = review.review_rating %} {% set review = review.review_text %}
+
+          <a
+            href="{{link}}"
+            target="_blank"
+            class="carousel-item {% if loop.first %}active{% endif %} text-decoration-none"
+          >
             <img
               loading="lazy"
-              src="https://picsum.photos/200"
-              alt=""
+              src="{% if image %}{{ image }}{% else %}{{url_for('static', filename='images/image_author.png')}}{% endif %}"
+              alt="{{author}}'s photo"
               class="img-fluid ratio-1x1 mt-5 mb-4 rounded-circle d-block testi-img mx-auto"
             />
+            <div class="py-4">
+              {% for i in range(rating) %}
+              <i class="bx bxs-star bx-sm" style="color: gold"></i>{% endfor %}
+            </div>
             <p
               class="lead fw-normal text-muted mb-2 mb-lg-3 col-md-8 col-lg-6 mx-auto"
             >
-              I can't get enough of their fresh pastries. Every bite is
-              perfection, and the cozy atmosphere makes it even better
+              {% if not review %} Good {% else %} {{ review }} {% endif %}
             </p>
-            <p class="lead fw-normal fw-bold mb-2 mb-lg-3">- Sarah J.</p>
-          </div>
-          <div class="carousel-item">
-            <img
-              loading="lazy"
-              src="https://picsum.photos/200"
-              alt=""
-              class="img-fluid ratio-1x1 mt-5 mb-4 rounded-circle d-block testi-img mx-auto"
-            />
             <p
-              class="lead fw-normal text-muted mb-2 mb-lg-3 col-md-8 col-lg-6 mx-auto"
+              class="lead fw-normal fw-bold mb-2 mb-lg-3 text-primary text-capitalize"
             >
-              I can't get enough of their fresh pastries. Every bite is
-              perfection, and the cozy atmosphere makes it even better
+              - {{author}}
             </p>
-            <p class="lead fw-normal fw-bold mb-2 mb-lg-3">- Sarah J.</p>
-          </div>
-          <div class="carousel-item">
-            <img
-              loading="lazy"
-              src="https://picsum.photos/200"
-              alt=""
-              class="img-fluid ratio-1x1 mt-5 mb-4 rounded-circle d-block testi-img mx-auto"
-            />
-            <p
-              class="lead fw-normal text-muted mb-2 mb-lg-3 col-md-8 col-lg-6 mx-auto"
-            >
-              I can't get enough of their fresh pastries. Every bite is
-              perfection, and the cozy atmosphere makes it even better
-            </p>
-            <p class="lead fw-normal fw-bold mb-2 mb-lg-3">- Sarah J.</p>
-          </div>
-          <div class="carousel-item">
-            <img
-              loading="lazy"
-              src="https://picsum.photos/200"
-              alt=""
-              class="img-fluid ratio-1x1 mt-5 mb-4 rounded-circle d-block testi-img mx-auto"
-            />
-            <p
-              class="lead fw-normal text-muted mb-2 mb-lg-3 col-md-8 col-lg-6 mx-auto"
-            >
-              I can't get enough of their fresh pastries. Every bite is
-              perfection, and the cozy atmosphere makes it even better
-            </p>
-            <p class="lead fw-normal fw-bold mb-2 mb-lg-3">- Sarah J.</p>
-          </div>
+          </a>
+          {% endfor %}
         </div>
         <button
           class="carousel-control-prev"
