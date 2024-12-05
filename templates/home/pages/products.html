@@ -6,114 +6,50 @@
 <div class="container product-container">
   <h2 class="mb-4">Cookies & Snacks</h2>
   <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "cookies & snacks"%}
     <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Bitterballen Truffle Mushroom</h5>
-      <p>Rp. 25.000</p>
+      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
+      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
+      <p>{{product.price | format_idr}}</p>
       <button class="btn btn-primary w-100">Add to cart</button>
     </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Bitterballen Truffle Mushroom</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Bitterballen Truffle Mushroom</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Bitterballen Truffle Mushroom</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
+    {% endif %} {%endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Brownies</h2>
   <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "Brownies"%}
     <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
+      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
+      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
+      <p>{{product.price | format_idr}}</p>
       <button class="btn btn-primary w-100">Add to cart</button>
     </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
+    {% endif %} {%endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Cakes</h2>
   <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "Cakes"%}
     <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Cake</h5>
-      <p>Rp. 25.000</p>
+      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
+      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
+      <p>{{product.price | format_idr}}</p>
       <button class="btn btn-primary w-100">Add to cart</button>
     </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Cake</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Cake</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Cake</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
+    {% endif %} {%endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Pasta</h2>
   <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "Pasta"%}
     <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Pasta</h5>
-      <p>Rp. 25.000</p>
+      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
+      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
+      <p>{{product.price | format_idr}}</p>
       <button class="btn btn-primary w-100">Add to cart</button>
     </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Pasta</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Pasta</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Pasta</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
+    {% endif %} {%endfor %}
   </div>
 </div>
 {% endblock %}

@@ -162,7 +162,10 @@ def contact():
 # Rute untuk halaman produk
 @app.route("/products")
 def products():
-    return render_template("home/pages/products.html")
+    products = db.products.find({})
+
+    return render_template("home/pages/products.html", products=products)
+
 
 
 # Rute untuk halaman produk
@@ -247,6 +250,7 @@ def users_table():
 
 # endpoint dashboard create users
 @app.route("/admin/user/create", methods=["GET", "POST"])
+@admin_required
 def create_user():
     # permintaan menggunakan method POST
     if request.method == "POST":
@@ -322,6 +326,7 @@ def delete_user():
 
 # endpoint dashboard table products
 @app.route("/admin/products")
+@admin_required
 def products_table():
     products = list(db.products.find())
     for product in products:
@@ -331,6 +336,7 @@ def products_table():
 
 # endpoint dashboard create products
 @app.route("/admin/products/create", methods=["GET", "POST"])
+@admin_required
 def create_product():
     if request.method == "POST":
         # Mengambil data dari form
@@ -458,34 +464,6 @@ def update_order_status():
     db.orders.update_one({"_id": ObjectId(order_id)}, {"$set": {"status": status}})
 
     return jsonify({"msg": "Order status updated successfully!"})
-
-
-# endpoint contact table
-@app.route("/contact_messages")
-def contact_messages():
-    # Contoh: Ambil pesan dari database
-    messages = [
-        {
-            "name": "John Doe",
-            "phonenumber": "1234567890098",
-            "message": "Hello, how can I contact support?",
-        },
-        {
-            "name": "Jane Smith",
-            "phonenumber": "09876543211234",
-            "message": "Is there any update on my order?",
-        },
-    ]
-    return render_template("admin/pages/contact_messages.html", messages=messages)
-
-
-@app.route("/admin/contact/delete", methods=["POST"])
-def delete_message():
-    message_id = request.form.get("id_give")
-    # Lakukan penghapusan pesan dari database atau sistem
-    # Berikan response sukses setelah penghapusan
-    return jsonify(msg="Message deleted successfully!")
-
 
 # Jalankan aplikasi
 if __name__ == "__main__":
