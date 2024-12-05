@@ -236,6 +236,25 @@ def cart(username):
         is_logged_in = False
         return redirect(url_for("login"))
 
+@app.route("/add_to_cart", methods=["POST"])
+@login_required
+def add_to_cart():
+    token_receive = request.cookies.get("mytoken")
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+    username = payload["id"]
+
+    # Data dari form
+    product_id = request.form.get("product_id")
+    quantity = int(request.form.get("quantity", 1))
+
+    # Ambil data produk dari database
+    product = db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        return jsonify({"msg": "Produk tidak ditemukan!"}), 404
+
+    return jsonify({"msg": "Produk berhasil ditambahkan ke keranjang!"})
+
+
 
 # endpoint dashboard table users
 @app.route("/admin/users")
