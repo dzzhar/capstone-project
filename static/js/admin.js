@@ -42,7 +42,7 @@
     });
 })(jQuery);
 
-// password eye
+// password eye and datatable
 $(document).ready(function () {
   $("#togglePassword").on("click", function () {
     const passwordInput = $("#password");
@@ -55,5 +55,13 @@ $(document).ready(function () {
       passwordInput.attr("type", "password");
       passwordIcon.removeClass("fa-eye-slash").addClass("fa-eye");
     }
+  });
+
+  $("#dataTable").DataTable({
+    paging: true,
+    searching: true,
+    ordering: true,
+    lengthChange: true,
+    pageLength: 10,
   });
 });

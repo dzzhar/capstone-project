@@ -1,16 +1,16 @@
 import hashlib
 import os
-import jinja2
 from datetime import datetime, timedelta
 from functools import wraps
 from os.path import dirname, join
 
+import jinja2
 import jwt
 from bson import ObjectId
+from bson.errors import InvalidId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
-from bson.errors import InvalidId
 from werkzeug.utils import secure_filename
 
 dotenv_path = join(dirname(__file__), ".env")
@@ -26,10 +26,10 @@ db = client[DB_NAME]
 
 app = Flask(__name__)
 
-@app.template_filter('format_number')
+
+@app.template_filter("format_number")
 def format_number(value):
     return f"{value:,.0f}"
-    
 
 
 # Konfigurasi untuk folder upload
@@ -149,7 +149,8 @@ def login():
 
     return render_template("home/pages/login.html")
 
-@app.route('/add_to_cart', methods=['POST'])
+
+@app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     token_receive = request.cookies.get("mytoken")
     if not token_receive:
@@ -178,12 +179,12 @@ def add_to_cart():
         # Jika tidak ada keranjang, buat keranjang baru
         new_cart = {
             "username": username,
-            "items": [{"product_id": product_id, "quantity": 1}]
+            "items": [{"product_id": product_id, "quantity": 1}],
         }
         db.carts.insert_one(new_cart)
     else:
         # Jika sudah ada keranjang, perbarui
-        items = user_cart["items"]
+        items = user_cart.get("items", [])
         for item in items:
             if item["product_id"] == product_id:
                 item["quantity"] += 1
@@ -195,7 +196,6 @@ def add_to_cart():
 
     # Redirect ke halaman keranjang setelah sukses
     return redirect(url_for("cart", username=username))
-
 
 
 # endpoint logout
@@ -239,8 +239,6 @@ def products():
     )
 
 
-
-
 # Rute untuk halaman produk
 @app.route("/detail_product")
 def detail_product():
@@ -266,12 +264,14 @@ def cart(username):
                 if product:
                     item_price = int(product["price"]) * int(item["quantity"])
                     total_price += item_price
-                    cart_items.append({
-                        "product_name": product["product_name"],
-                        "price": product["price"],
-                        "image": product["image"],
-                        "quantity": item["quantity"]
-                    })
+                    cart_items.append(
+                        {
+                            "product_name": product["product_name"],
+                            "price": product["price"],
+                            "image": product["image"],
+                            "quantity": item["quantity"],
+                        }
+                    )
 
         is_logged_in = True
 
@@ -280,12 +280,11 @@ def cart(username):
             user_info=user_info,
             is_logged_in=is_logged_in,
             cart_items=cart_items,
-            total_price=total_price
+            total_price=total_price,
         )
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return redirect(url_for("login"))
-
 
 
 """ ------ DASHBOARD ADMIN SECTION ------ """
@@ -556,6 +555,7 @@ def update_order_status():
     db.orders.update_one({"_id": ObjectId(order_id)}, {"$set": {"status": status}})
 
     return jsonify({"msg": "Order status updated successfully!"})
+
 
 # Jalankan aplikasi
 if __name__ == "__main__":
