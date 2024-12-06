@@ -423,3 +423,15 @@ footer img {
   object-fit: cover;
   border-radius: 1rem;
 }
+
+.cart {
+  position: relative;
+  padding-bottom: 150px; /* Tambahkan ruang bawah agar ringkasan tidak menutupi item */
+}
+
+.cart-summary {
+  bottom: 20px;
+  right: 20px;
+  max-width: 300px;
+  z-index: 10;
+}
