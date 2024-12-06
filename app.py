@@ -1,5 +1,6 @@
 import hashlib
 import os
+import jinja2
 from datetime import datetime, timedelta
 from functools import wraps
 from os.path import dirname, join
@@ -9,6 +10,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
+from bson.errors import InvalidId
 from werkzeug.utils import secure_filename
 
 dotenv_path = join(dirname(__file__), ".env")
@@ -23,6 +25,11 @@ client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
 app = Flask(__name__)
+
+@app.template_filter('format_number')
+def format_number(value):
+    return f"{value:,.0f}"
+    
 
 
 # Konfigurasi untuk folder upload
@@ -142,6 +149,54 @@ def login():
 
     return render_template("home/pages/login.html")
 
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    token_receive = request.cookies.get("mytoken")
+    if not token_receive:
+        return redirect(url_for("login"))  # Redirect jika token tidak ada
+
+    try:
+        # Decode JWT untuk mendapatkan informasi pengguna
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+        username = payload["id"]
+    except (jwt.ExpiredSignatureError, jwt.DecodeError):
+        return redirect(url_for("login"))  # Redirect jika token invalid
+
+    # Ambil `product_id` dari form
+    product_id = request.form.get("product_id")
+    if not product_id:
+        return jsonify({"result": "failure", "msg": "Product ID is required."}), 400
+
+    # Cari produk berdasarkan ID
+    product = db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        return jsonify({"result": "failure", "msg": "Product not found."}), 404
+
+    # Periksa apakah pengguna sudah memiliki keranjang
+    user_cart = db.carts.find_one({"username": username})
+    if not user_cart:
+        # Jika tidak ada keranjang, buat keranjang baru
+        new_cart = {
+            "username": username,
+            "items": [{"product_id": product_id, "quantity": 1}]
+        }
+        db.carts.insert_one(new_cart)
+    else:
+        # Jika sudah ada keranjang, perbarui
+        items = user_cart["items"]
+        for item in items:
+            if item["product_id"] == product_id:
+                item["quantity"] += 1
+                break
+        else:
+            # Tambahkan produk baru ke keranjang
+            items.append({"product_id": product_id, "quantity": 1})
+        db.carts.update_one({"username": username}, {"$set": {"items": items}})
+
+    # Redirect ke halaman keranjang setelah sukses
+    return redirect(url_for("cart", username=username))
+
+
 
 # endpoint logout
 @app.route("/logout")
@@ -153,18 +208,36 @@ def logout():
     return response
 
 
-# Rute untuk halaman kontak
-@app.route("/contact")
-def contact():
-    return render_template("home/pages/contact.html")
-
-
-# Rute untuk halaman produk
 @app.route("/products")
 def products():
-    products = db.products.find({})
+    token_receive = request.cookies.get("mytoken")
+    user_info = None
+    is_logged_in = False
 
-    return render_template("home/pages/products.html", products=products)
+    # Ambil data produk dari MongoDB
+    products = list(db.products.find({}))
+    for product in products:
+        product["_id"] = str(product["_id"])  # Ubah ObjectId ke string
+
+    if token_receive:
+        try:
+            # Decode token untuk mendapatkan informasi pengguna
+            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+            user_info = db.users.find_one({"username": payload["id"]})
+            is_logged_in = True  # Tandai pengguna sebagai login
+        except jwt.ExpiredSignatureError:
+            pass
+        except jwt.exceptions.DecodeError:
+            pass
+
+    # Render halaman produk dengan data login dan produk
+    return render_template(
+        "home/pages/products.html",
+        is_logged_in=is_logged_in,
+        user_info=user_info,
+        products=products,
+    )
+
 
 
 
@@ -174,44 +247,44 @@ def detail_product():
     return render_template("home/pages/detail_product.html")
 
 
-# endpoint cart
 @app.route("/cart/<username>")
 def cart(username):
     token_receive = request.cookies.get("mytoken")
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
-
-        # Pastikan username di URL sama dengan username di token
         if username != payload["id"]:
             return redirect(url_for("login"))
 
         user_info = db.users.find_one({"username": username})
+        user_cart = db.carts.find_one({"username": username})
+        cart_items = []
+        total_price = 0
+
+        if user_cart and user_cart.get("items"):
+            for item in user_cart["items"]:
+                product = db.products.find_one({"_id": ObjectId(item["product_id"])})
+                if product:
+                    item_price = int(product["price"]) * int(item["quantity"])
+                    total_price += item_price
+                    cart_items.append({
+                        "product_name": product["product_name"],
+                        "price": product["price"],
+                        "image": product["image"],
+                        "quantity": item["quantity"]
+                    })
+
         is_logged_in = True
+
         return render_template(
-            "home/pages/cart.html", user_info=user_info, is_logged_in=is_logged_in
+            "home/pages/cart.html",
+            user_info=user_info,
+            is_logged_in=is_logged_in,
+            cart_items=cart_items,
+            total_price=total_price
         )
 
-    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-        is_logged_in = False
+    except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return redirect(url_for("login"))
-
-@app.route("/add_to_cart", methods=["POST"])
-@login_required
-def add_to_cart():
-    token_receive = request.cookies.get("mytoken")
-    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
-    username = payload["id"]
-
-    # Data dari form
-    product_id = request.form.get("product_id")
-    quantity = int(request.form.get("quantity", 1))
-
-    # Ambil data produk dari database
-    product = db.products.find_one({"_id": ObjectId(product_id)})
-    if not product:
-        return jsonify({"msg": "Produk tidak ditemukan!"}), 404
-
-    return jsonify({"msg": "Produk berhasil ditambahkan ke keranjang!"})
 
 
 

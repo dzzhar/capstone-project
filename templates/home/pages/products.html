@@ -1,110 +1,75 @@
-{% extends 'home/base.html' %} 
+{% extends 'home/base.html' %}
 
-{% block title %}Products | By.Notti{% endblock %} 
+{% block title %}Products | By.Notti{% endblock %}
 
 {% block content %}
 <div class="container product-container">
   <h2 class="mb-4">Cookies & Snacks</h2>
   <div class="scrollable-container">
-    {% for product in products %} {% if product.category == "cookies & snacks"%}
+    {% for product in products %}
+    {% if product.category == "cookies & snacks" %}
     <div class="product-card flex-grow-1">
       <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
-      <p>{{product.price | format_idr}}</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
+      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+      <p>{{ product.price }}</p>
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
+        <input type="hidden" name="product_id" value="{{ product._id }}">
+        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
+      </form>
     </div>
-<<<<<<< HEAD
-    <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
-      <input type="hidden" name="product_id" value="product_id_bitterballen">
-      <input type="hidden" name="quantity" value="1">
-      <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-    </form>
-=======
-    {% endif %} {%endfor %}
->>>>>>> cbc46c64f58d83106cfb30f657fee355d03d5033
+    {% endif %}
+    {% endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Brownies</h2>
   <div class="scrollable-container">
-    {% for product in products %} {% if product.category == "Brownies"%}
+    {% for product in products %}
+    {% if product.category == "brownies" %}
     <div class="product-card flex-grow-1">
-<<<<<<< HEAD
-      <img src="https://tse1.mm.bing.net/th?id=OIP.TQyxAQOQRUJizTGD0o28-QHaHa&pid=Api&P=0&h=180" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <div class="product-card flex-grow-1">
-      <img src="https://picsum.photos/200/150" alt="Product" />
-      <h5 class="mt-2 fw-bold">Brownies</h5>
-      <p>Rp. 25.000</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
-    </div>
-    <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
-      <input type="hidden" name="product_id" value="product_id_brownies">
-      <input type="hidden" name="quantity" value="1">
-      <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-    </form>
-=======
       <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
-      <p>{{product.price | format_idr}}</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
+      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+      <p>{{ product.price }}</p>
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
+        <input type="hidden" name="product_id" value="{{ product._id }}">
+        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
+      </form>
     </div>
-    {% endif %} {%endfor %}
->>>>>>> cbc46c64f58d83106cfb30f657fee355d03d5033
+    {% endif %}
+    {% endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Cakes</h2>
   <div class="scrollable-container">
-    {% for product in products %} {% if product.category == "Cakes"%}
+    {% for product in products %}
+    {% if product.category == "cakes" %}
     <div class="product-card flex-grow-1">
       <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
-      <p>{{product.price | format_idr}}</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
+      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+      <p>{{ product.price }}</p>
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
+        <input type="hidden" name="product_id" value="{{ product._id }}">
+        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
+      </form>
     </div>
-<<<<<<< HEAD
-    <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
-      <input type="hidden" name="product_id" value="product_id_Cakes">
-      <input type="hidden" name="quantity" value="1">
-      <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-    </form>
-=======
-    {% endif %} {%endfor %}
->>>>>>> cbc46c64f58d83106cfb30f657fee355d03d5033
+    {% endif %}
+    {% endfor %}
   </div>
 
   <h2 class="mb-4 mt-5">Pasta</h2>
   <div class="scrollable-container">
-    {% for product in products %} {% if product.category == "Pasta"%}
+    {% for product in products %}
+    {% if product.category == "pasta" %}
     <div class="product-card flex-grow-1">
       <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{product.product_name}}</h5>
-      <p>{{product.price | format_idr}}</p>
-      <button class="btn btn-primary w-100">Add to cart</button>
+      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+      <p>{{ product.price }}</p>
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
+        <input type="hidden" name="product_id" value="{{ product._id }}">
+        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
+      </form>
     </div>
-<<<<<<< HEAD
-    <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
-      <input type="hidden" name="product_id" value="product_id_Pasta">
-      <input type="hidden" name="quantity" value="1">
-      <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-    </form>
-=======
-    {% endif %} {%endfor %}
->>>>>>> cbc46c64f58d83106cfb30f657fee355d03d5033
+    {% endif %}
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

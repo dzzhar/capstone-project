@@ -1,99 +1,67 @@
-{% extends 'home/base.html' %} {% block title %}Cart | By.Notti{% endblock %} {%
-    block content %}
-    <div class="container">
-      <div class="row gx-4 cart">
-        <div class="col-lg-8 mb-4" id="cartItems">
-          <div
-            class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center"
-            data-harga="50000"
-          >
-            <img
-              src="{{ url_for('static', filename='images/best-seller1.png') }}"
-              alt="Gambar Produk"
-              class="img-fluid rounded me-3 object-fit-cover"
-              style="width: 100px; height: 100px"
-            />
-            <div class="flex-grow-1 d-flex justify-content-between">
-              <div>
-                <h5 class="mb-2 text-primary fw-bold">Nama Produk</h5>
-                <div class="d-flex align-items-center">
-                  <span class="text-muted me-3 d-none d-md-block">Quantity</span>
-                  <div class="d-flex align-items-center border-number">
-                    <button class="minus-btn">-</button>
-                    <p class="jumlah-item">1</p>
-                    <button class="plus-btn">+</button>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="d-flex flex-column align-items-end justify-content-between"
-              >
-                <h5 class="mb-2 text-primary fw-bold">
-                  <span class="harga-item">Rp. 50.000</span>
-                </h5>
-                <button class="btn btn-danger btn-sm hapus-item">
-                  <i class="bx bx-trash"></i>
-                </button>
+{% extends 'home/base.html' %}
+
+{% block title %}Cart | By.Notti{% endblock %}
+
+{% block content %}
+
+<div class="row gx-4 cart">
+  <div class="col-lg-8 mb-4" id="cartItems">
+    {% if cart_items %}
+      {% for item in cart_items %}
+      <div class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center" data-harga="{{ item.price }}">
+        <img
+          src="{{ url_for('static', filename='images/' ~ item.image) }}"
+          alt="{{ item.product_name }}"
+          class="img-fluid rounded me-3 object-fit-cover"
+          style="width: 100px; height: 100px"
+        />
+        <div class="flex-grow-1 d-flex justify-content-between">
+          <div>
+            <h5 class="mb-2 text-primary fw-bold">{{ item.product_name }}</h5>
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-3 d-none d-md-block">Quantity</span>
+              <div class="d-flex align-items-center border-number">
+                <button class="minus-btn" onclick="updateQuantity('minus', {{ item.id }})">-</button>
+                <p class="jumlah-item">{{ item.quantity }}</p>
+                <button class="plus-btn" onclick="updateQuantity('plus', {{ item.id }})">+</button>
               </div>
             </div>
           </div>
-          <div
-            class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center"
-            data-harga="50000"
-          >
-            <img
-              src="{{ url_for('static', filename='images/best-seller1.png') }}"
-              alt="Gambar Produk"
-              class="img-fluid rounded me-3 object-fit-cover"
-              style="width: 100px; height: 100px"
-            />
-            <div class="flex-grow-1 d-flex justify-content-between">
-              <div>
-                <h5 class="mb-2 text-primary fw-bold">Nama Produk</h5>
-                <div class="d-flex align-items-center">
-                  <span class="text-muted me-3 d-none d-md-block">Quantity</span>
-                  <div class="d-flex align-items-center border-number">
-                    <button class="minus-btn">-</button>
-                    <p class="jumlah-item">1</p>
-                    <button class="plus-btn">+</button>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="d-flex flex-column align-items-end justify-content-between"
-              >
-                <h5 class="mb-2 text-primary fw-bold">
-                  <span class="harga-item">Rp. 50.000</span>
-                </h5>
-                <button class="btn btn-danger btn-sm hapus-item">
-                  <i class="bx bx-trash"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <div class="col-lg-4">
-          <div class="cart-summary p-3 border rounded-3">
-            <h5 class="text-primary mb-3 fw-bold">Ringkasan Pesanan</h5>
-    
-            <div class="d-flex justify-content-between mb-3">
-              <span class="fw-bold text-primary">Total</span>
-              <span class="fw-bold text-primary">
-                <span id="total">Rp. 50.000</span>
-              </span>
-            </div>
-            <a
-              href="#"
-              id="whatsappOrder"
-              class="btn btn-success w-100 rounded-pill"
-              target="_blank"
-            >
-              Pesan Sekarang via WhatsApp
-            </a>
+          <div class="d-flex flex-column align-items-end justify-content-between">
+            <h5 class="mb-2 text-primary fw-bold">
+              <!-- Menggunakan built-in formatting -->
+              <span class="harga-item">Rp. {{ '{:,.0f}'.format(item.price | int) }}</span>
+            </h5>
+            <button class="btn btn-danger btn-sm hapus-item" onclick="removeItem({{ item.id }})">
+              <i class="bx bx-trash"></i>
+            </button>
           </div>
         </div>
       </div>
+      {% endfor %}
+    {% else %}
+      <p>Your cart is empty. Start shopping now!</p>
+    {% endif %}
+  </div>
+</div>
+<div class="col-lg-4">
+  <div class="cart-summary p-3 border rounded-3">
+    <h5 class="text-primary mb-3 fw-bold">Ringkasan Pesanan</h5>
+
+    <div class="d-flex justify-content-between mb-3">
+      <span class="fw-bold text-primary">Total</span>
+      <span class="fw-bold text-primary">
+        <span id="total">Rp. 50.000</span>
+      </span>
     </div>
-    {% endblock %}
-    
+    <a
+      href="#"
+      id="whatsappOrder"
+      class="btn btn-success w-100 rounded-pill"
+      target="_blank"
+    >
+      Pesan Sekarang via WhatsApp
+    </a>
+  </div>
+        </div>
+{% endblock %}
