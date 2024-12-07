@@ -4,10 +4,8 @@ from datetime import datetime, timedelta
 from functools import wraps
 from os.path import dirname, join
 
-import jinja2
 import jwt
 from bson import ObjectId
-from bson.errors import InvalidId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from pymongo import MongoClient
@@ -25,11 +23,6 @@ client = MongoClient(MONGODB_URI)
 db = client[DB_NAME]
 
 app = Flask(__name__)
-
-
-@app.template_filter("format_number")
-def format_number(value):
-    return f"{value:,.0f}"
 
 
 # Konfigurasi untuk folder upload
@@ -50,7 +43,7 @@ def allowed_file(filename):
 def format_idr(value):
     # Ensure value is treated as a number (float or int)
     value = float(value)
-    return f"Rp. {value:,.0f}".replace(",", ".")
+    return f"Rp. {value:,.0f}"
 
 
 app.jinja_env.filters["format_idr"] = format_idr
@@ -150,6 +143,78 @@ def login():
     return render_template("home/pages/login.html")
 
 
+# endpoint logout
+@app.route("/logout")
+def logout():
+    response = redirect(url_for("login"))
+
+    # menghapus cookies
+    response.set_cookie("mytoken", "", expires=0)
+    return response
+
+
+@app.route("/products")
+def products():
+    token_receive = request.cookies.get("mytoken")
+    user_info = None
+    is_logged_in = False
+
+    # Ambil data produk dari MongoDB
+    products = list(db.products.find({}))
+    for product in products:
+        product["_id"] = str(product["_id"])  # Ubah ObjectId ke string
+
+    if token_receive:
+        try:
+            # Decode token untuk mendapatkan informasi pengguna
+            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+            user_info = db.users.find_one({"username": payload["id"]})
+            is_logged_in = True  # Tandai pengguna sebagai login
+        except jwt.ExpiredSignatureError:
+            pass
+        except jwt.exceptions.DecodeError:
+            pass
+
+    # Render halaman produk dengan data login dan produk
+    return render_template(
+        "home/pages/products.html",
+        is_logged_in=is_logged_in,
+        user_info=user_info,
+        products=products,
+    )
+
+
+# Rute untuk halaman produk
+@app.route("/product/<id>")
+def detail_product(id):
+    token_receive = request.cookies.get("mytoken")
+    user_info = None
+    is_logged_in = False
+
+    # mencari produk berdasarkan id
+    product = db.products.find_one({"_id": ObjectId(id)})
+
+    if token_receive:
+        try:
+            # Decode token untuk mendapatkan informasi pengguna
+            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+            user_info = db.users.find_one({"username": payload["id"]})
+            is_logged_in = True  # Tandai pengguna sebagai login
+        except jwt.ExpiredSignatureError:
+            pass
+        except jwt.exceptions.DecodeError:
+            pass
+
+    # Render halaman detail
+    return render_template(
+        "home/pages/detail_product.html",
+        is_logged_in=is_logged_in,
+        user_info=user_info,
+        product=product,
+    )
+
+
+# Rute untuk menambah produk ke cart
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     token_receive = request.cookies.get("mytoken")
@@ -198,53 +263,7 @@ def add_to_cart():
     return redirect(url_for("cart", username=username))
 
 
-# endpoint logout
-@app.route("/logout")
-def logout():
-    response = redirect(url_for("login"))
-
-    # menghapus cookies
-    response.set_cookie("mytoken", "", expires=0)
-    return response
-
-
-@app.route("/products")
-def products():
-    token_receive = request.cookies.get("mytoken")
-    user_info = None
-    is_logged_in = False
-
-    # Ambil data produk dari MongoDB
-    products = list(db.products.find({}))
-    for product in products:
-        product["_id"] = str(product["_id"])  # Ubah ObjectId ke string
-
-    if token_receive:
-        try:
-            # Decode token untuk mendapatkan informasi pengguna
-            payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
-            user_info = db.users.find_one({"username": payload["id"]})
-            is_logged_in = True  # Tandai pengguna sebagai login
-        except jwt.ExpiredSignatureError:
-            pass
-        except jwt.exceptions.DecodeError:
-            pass
-
-    # Render halaman produk dengan data login dan produk
-    return render_template(
-        "home/pages/products.html",
-        is_logged_in=is_logged_in,
-        user_info=user_info,
-        products=products,
-    )
-
-
-# Rute untuk halaman produk
-@app.route("/detail_product")
-def detail_product():
-    return render_template("home/pages/detail_product.html")
-
-
+# endpoint cart
 @app.route("/cart/<username>")
 def cart(username):
     token_receive = request.cookies.get("mytoken")

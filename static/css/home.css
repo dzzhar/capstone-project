@@ -339,16 +339,6 @@ footer img {
   border-radius: 2rem 2rem 0 0;
 }
 
-.text-area {
-  resize: none;
-  height: 10vh;
-}
-
-.hr-line {
-  width: 100%;
-  border-radius: 1rem;
-}
-
 @media (min-width: 992px) {
   .img-contact {
     height: 43rem;
@@ -434,4 +424,15 @@ footer img {
   right: 20px;
   max-width: 300px;
   z-index: 10;
+}
+
+/* product detail */
+.product-wrapper {
+  margin-top: 9rem;
+}
+
+@media (min-width: 768px) {
+  .product-wrapper {
+    margin-top: 11rem;
+  }
 }

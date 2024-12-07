@@ -1,75 +1,169 @@
 {% extends 'home/base.html' %}
 
+<!-- title -->
 {% block title %}Products | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
 <div class="container product-container">
-  <h2 class="mb-4">Cookies & Snacks</h2>
-  <div class="scrollable-container">
-    {% for product in products %}
-    {% if product.category == "cookies & snacks" %}
-    <div class="product-card flex-grow-1">
-      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-      <p>{{ product.price }}</p>
-      <form method="POST" action="{{ url_for('add_to_cart') }}">
-        <input type="hidden" name="product_id" value="{{ product._id }}">
-        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-      </form>
+  <!-- cookies & snacks category -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-6 mb-0 text-primary">Cookies & Snacks</h1>
+    <div class="d-none d-md-flex">
+      <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
+      <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
-    {% endif %}
-    {% endfor %}
+  </div>
+  <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "cookies & snacks"
+    %}
+    <a
+      href="{{ url_for('detail_product', id=product._id) }}"
+      class="pointer-event text-decoration-none"
+    >
+      <div class="product-card h-100">
+        <img
+          src="{{ url_for('static', filename='images/' ~ product.image) }}"
+          alt="{{ product.product_name }}"
+          class="object-fit-cover"
+        />
+        <h5 class="mt-2 fw-bold text-capitalize text-primary display-6">
+          {{ product.product_name }}
+        </h5>
+        <h5 class="fw-bold">{{ product.price |format_idr }}</h5>
+
+        <form method="POST" action="{{ url_for('add_to_cart') }}" class="">
+          <input type="hidden" name="product_id" value="{{ product._id }}" />
+          <button type="submit" class="btn btn-primary w-100">
+            Add to cart
+          </button>
+        </form>
+      </div>
+    </a>
+    {% endif %} {% endfor %}
   </div>
 
-  <h2 class="mb-4 mt-5">Brownies</h2>
-  <div class="scrollable-container">
-    {% for product in products %}
-    {% if product.category == "brownies" %}
-    <div class="product-card flex-grow-1">
-      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-      <p>{{ product.price }}</p>
-      <form method="POST" action="{{ url_for('add_to_cart') }}">
-        <input type="hidden" name="product_id" value="{{ product._id }}">
-        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-      </form>
+  <!-- brownies category -->
+  <div
+    class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
+  >
+    <h1 class="display-6 mb-0 text-primary">Brownies</h1>
+    <div class="d-none d-md-flex">
+      <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
+      <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
-    {% endif %}
-    {% endfor %}
+  </div>
+  <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "brownies" %}
+    <a
+      href="{{ url_for('detail_product', id=product._id) }}"
+      class="pointer-event text-decoration-none"
+    >
+      <div class="product-card">
+        <img
+          src="{{ url_for('static', filename='images/' ~ product.image) }}"
+          alt="{{ product.product_name }}"
+          class="product-image"
+        />
+        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+        <p>{{ product.price }}</p>
+        <form method="POST" action="{{ url_for('add_to_cart') }}">
+          <input type="hidden" name="product_id" value="{{ product._id }}" />
+          <button type="submit" class="btn btn-primary w-100">
+            Add to cart
+          </button>
+        </form>
+      </div>
+    </a>
+    {% endif %} {% endfor %}
   </div>
 
-  <h2 class="mb-4 mt-5">Cakes</h2>
-  <div class="scrollable-container">
-    {% for product in products %}
-    {% if product.category == "cakes" %}
-    <div class="product-card flex-grow-1">
-      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-      <p>{{ product.price }}</p>
-      <form method="POST" action="{{ url_for('add_to_cart') }}">
-        <input type="hidden" name="product_id" value="{{ product._id }}">
-        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-      </form>
+  <!-- cakes category -->
+  <div
+    class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
+  >
+    <h1 class="display-6 mb-0 text-primary">Cakes</h1>
+    <div class="d-none d-md-flex">
+      <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
+      <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
-    {% endif %}
-    {% endfor %}
+  </div>
+  <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "cakes" %}
+    <a
+      href="{{ url_for('detail_product', id=product._id) }}"
+      class="pointer-event text-decoration-none"
+    >
+      <div class="product-card">
+        <img
+          src="{{ url_for('static', filename='images/' ~ product.image) }}"
+          alt="{{ product.product_name }}"
+          class="product-image"
+        />
+        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+        <p>{{ product.price }}</p>
+        <form method="POST" action="{{ url_for('add_to_cart') }}">
+          <input type="hidden" name="product_id" value="{{ product._id }}" />
+          <button type="submit" class="btn btn-primary w-100">
+            Add to cart
+          </button>
+        </form>
+      </div>
+    </a>
+    {% endif %} {% endfor %}
   </div>
 
-  <h2 class="mb-4 mt-5">Pasta</h2>
-  <div class="scrollable-container">
-    {% for product in products %}
-    {% if product.category == "pasta" %}
-    <div class="product-card flex-grow-1">
-      <img src="{{ url_for('static', filename='images/' ~ product.image) }}" alt="{{ product.product_name }}" />
-      <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-      <p>{{ product.price }}</p>
-      <form method="POST" action="{{ url_for('add_to_cart') }}">
-        <input type="hidden" name="product_id" value="{{ product._id }}">
-        <button type="submit" class="btn btn-primary w-100">Add to cart</button>
-      </form>
+  <!-- pasta category -->
+  <div
+    class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
+  >
+    <h1 class="display-6 mb-0 text-primary">Pasta</h1>
+    <div class="d-none d-md-flex">
+      <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
+      <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
-    {% endif %}
-    {% endfor %}
   </div>
+  <div class="scrollable-container">
+    {% for product in products %} {% if product.category == "pasta" %}
+    <a
+      href="{{ url_for('detail_product', id=product._id) }}"
+      class="pointer-event text-decoration-none"
+    >
+      <div class="product-card">
+        <img
+          src="{{ url_for('static', filename='images/' ~ product.image) }}"
+          alt="{{ product.product_name }}"
+          class="product-image"
+        />
+        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
+        <p>{{ product.price }}</p>
+        <form method="POST" action="{{ url_for('add_to_cart') }}">
+          <input type="hidden" name="product_id" value="{{ product._id }}" />
+          <button type="submit" class="btn btn-primary w-100">
+            Add to cart
+          </button>
+        </form>
+      </div>
+    </a>
+    {% endif %} {% endfor %}
+  </div>
+
+  <script>
+    // scroll container product
+    document.querySelectorAll(".scrollable-container").forEach((container) => {
+      const leftArrow =
+        container.previousElementSibling.querySelector(".left-arrow");
+      const rightArrow =
+        container.previousElementSibling.querySelector(".right-arrow");
+
+      leftArrow.addEventListener("click", () => {
+        container.scrollBy({ left: -300, behavior: "smooth" });
+      });
+
+      rightArrow.addEventListener("click", () => {
+        container.scrollBy({ left: 300, behavior: "smooth" });
+      });
+    });
+  </script>
+  {% endblock %}
 </div>
-{% endblock %}
