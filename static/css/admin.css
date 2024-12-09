@@ -1524,3 +1524,9 @@ body.sidebar-toggled footer.sticky-footer {
   color: #6c757d;
   z-index: 10;
 }
+
+@media (min-width: 992px) {
+  .select-orders {
+    width: 60%;
+  }
+}

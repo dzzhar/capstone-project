@@ -6,6 +6,21 @@
 <!-- content -->
 {% block content %}
 <div class="container-fluid">
+  <!-- alert -->
+  <div
+    id="successAlert"
+    class="alert alert-success alert-dismissible fade d-none"
+    role="alert"
+  >
+    <strong id="alertStrong">-</strong>
+    <span id="alertMessage">-</span>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
   <h4 class="mb-2 mb-4">Orders Table</h4>
 
   <div class="card shadow mb-4">
@@ -14,53 +29,79 @@
     </div>
     <div class="card-body">
       <div class="table-responsive">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <table
+          class="table table-bordered"
+          id="dataTable"
+          width="100%"
+          cellspacing="0"
+        >
           <thead>
-              <tr>
-                  <th class="align-middle">No.</th>
-                  <th class="align-middle">Products Name</th>
-                  <th class="align-middle">Customer</th>
-                  <th class="align-middle">Customer address</th>
-                  <th class="align-middle">Purchased On</th>
-                  <th class="align-middle">Quantity</th>
-                  <th class="align-middle">Total Price</th>
-                  <th class="align-middle">Status</th>
-                  <th class="align-middle">Action</th> 
-              </tr>
+            <tr>
+              <th class="align-middle text-center">No.</th>
+              <th class="align-middle text-start">Products Name</th>
+              <th class="align-middle text-start">Customer</th>
+              <th class="align-middle text-start">Customer address</th>
+              <th class="align-middle text-center">Purchased On</th>
+              <th class="align-middle text-center">Quantity</th>
+              <th class="align-middle text-center">Total Price</th>
+              <th class="align-middle" style="width: 15rem">Status</th>
+              <th class="align-middle">Action</th>
+            </tr>
           </thead>
           <tbody>
-              {% for order in orders %}
-              <tr>
-                  <td>{{ loop.index }}</td>
-                  <td>
-                      {% for product in order.products %}
-                      {{ product.name }} - {{ product.price }} x {{ product.quantity }}<br>
-                      {% endfor %}
-                  </td>
-                  <td>{{ order.customer_name }}</td> 
-                  <td>{{ order.customer_address }}</td>  
-                  <td>{{ order.purchased_on.strftime('%Y-%m-%d') }}</td>
-                  <td>{{ order.total_quantity }}</td>
-                  <td>{{ order.total_price }}</td>
-                  <td id="status-{{ order._id }}">
-                      <span class="badge text-capitalize {% if order.status == 'pending' %}bg-warning{% elif order.status == 'on process' %}bg-primary{% elif order.status == 'done' %}bg-success{% endif %}">
-                          {{ order.status }}
-                      </span>
-                  </td>
-                  <td>
-                      <select class="form-select form-select-sm" onchange="updateOrderStatus('{{ order._id }}', this.value)">
-                          <option value="pending" {% if order.status == 'pending' %} selected{% endif %}>Pending</option>
-                          <option value="on process" {% if order.status == 'on process' %} selected{% endif %}>On Process</option>
-                          <option value="done" {% if order.status == 'done' %} selected{% endif %}>Done</option>
-                      </select>
-                      <button class="btn btn-danger btn-sm" onclick="deleteOrder('{{ order._id }}')">
-                        <i class="bx bx-trash"></i> Hapus
-                    </button>
-                  </td>
-              </tr>
-              {% endfor %}
+            {% for order in orders %}
+            <tr>
+              <td class="align-middle text-center">{{ loop.index }}</td>
+              <td class="align-middle text-start">
+                {% for product in order.products %} {{ product.name }} - {{
+                product.price | format_idr}} x {{ product.quantity }}<br />
+                {% endfor %}
+              </td>
+              <td class="align-middle text-start">{{ order.customer_name }}</td>
+              <td class="align-middle text-start">
+                {{ order.customer_address }}
+              </td>
+              <td class="align-middle text-center">
+                {{ order.purchased_on.strftime('%Y-%m-%d') }}
+              </td>
+              <td class="align-middle text-center">
+                {{ order.total_quantity }}
+              </td>
+              <td class="align-middle text-center">
+                {{ order.total_price | format_idr }}
+              </td>
+              <td class="align-middle" id="status-{{ order._id }}">
+                <div
+                  class="d-flex flex-column flex-lg-row justify-content-between gap-2 align-items-center"
+                >
+                  <span
+                    class="badge text-capitalize d-flex align-items-center {% if order.status == 'pending' %}bg-warning{% elif order.status == 'on process' %}bg-primary{% elif order.status == 'done' %}bg-success{% endif %}"
+                  >
+                    {{ order.status }}
+                  </span>
+                  <select class="form-select form-select-sm select-orders" onchange="updateOrderStatus('{{ order._id }}', this.value)">
+                      <option value="pending" {% if order.status == 'pending' %} selected{% endif %}>Pending</option>
+                      <option value="on process" {% if order.status == 'on process' %} selected{% endif %}>On Process</option>
+                      <option value="done" {% if order.status == 'done' %} selected{% endif %}>Done</option>
+                    </select>
+                </div>
+              </td>
+
+              <td class="align-middle">
+                <a
+                  href="javascript:deleteOrder('{{ order._id }}')"
+                  class="btn btn-danger btn-icon-split"
+                >
+                  <span class="icon text-white-50">
+                    <i class="fas fa-trash"></i>
+                  </span>
+                  <span class="text">Delete</span>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
           </tbody>
-      </table>      
+        </table>
       </div>
     </div>
   </div>
@@ -73,15 +114,20 @@
       url: "/admin/order/update_status",
       data: { order_id: orderId, status: status },
       success: function (response) {
-
         const statusCell = document.getElementById(`status-${orderId}`);
-        statusCell.innerHTML = `<span class="badge ${
-          status === "pending"
+        const badge = statusCell.querySelector(".badge");
+
+        // Update status text
+        badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+        // Update badge class based on the new status
+        badge.className =
+          "badge text-capitalize d-flex align-items-center " +
+          (status === "pending"
             ? "bg-warning"
             : status === "on process"
             ? "bg-primary"
-            : "bg-success"
-        }">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+            : "bg-success");
       },
       error: function (error) {
         alert("Error updating order status");
@@ -91,25 +137,30 @@
 
   function deleteOrder(orderId) {
     if (confirm("Are you sure you want to delete this order?")) {
-        $.ajax({
-            type: "POST",
-            url: "/admin/order/delete",  
-            data: { order_id: orderId },
-            success: function(response) {
-                if (response.status === "success") {
-                    
-                    alert("Order deleted successfully!");
-                    window.location.reload(); 
-                } else {
-                    alert("Failed to delete order");
-                }
-            },
-            error: function() {
-                alert("Error while deleting the order");
-            }
-        });
-    }
-}
+      $.ajax({
+        type: "POST",
+        url: "/admin/order/delete",
+        data: { order_id: orderId },
+        success: function (response) {
+          // mengubah teks alert
+          document.getElementById("alertStrong").innerText = "Success!";
+          document.getElementById("alertMessage").innerText = response.message;
 
+          // menampilkan alert
+          const alertBox = document.getElementById("successAlert");
+          alertBox.classList.remove("d-none");
+          alertBox.classList.add("show");
+
+          // reload halaman setelah menutup alert
+          const closeButton = document.querySelector(
+            "#successAlert .btn-close"
+          );
+          closeButton.addEventListener("click", function () {
+            window.location.reload();
+          });
+        },
+      });
+    }
+  }
 </script>
 {% endblock %}

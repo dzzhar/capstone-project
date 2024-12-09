@@ -310,10 +310,15 @@ def cart(username):
 @app.route("/place_order", methods=["POST"])
 def place_order():
     data = request.get_json()
-    
+
     # Validasi data
     if not data.get("name") or not data.get("address") or not data.get("products"):
-        return jsonify({"status": "error", "message": "Nama, alamat, dan item harus diisi"}), 400
+        return (
+            jsonify(
+                {"status": "error", "message": "Nama, alamat, dan item harus diisi"}
+            ),
+            400,
+        )
 
     try:
         # Buat data pesanan
@@ -321,18 +326,22 @@ def place_order():
             "customer_name": data["name"],
             "customer_address": data["address"],
             "products": data["products"],
-            "total_price": sum(item["price"] * item["quantity"] for item in data["products"]),
+            "total_price": sum(
+                item["price"] * item["quantity"] for item in data["products"]
+            ),
             "status": "pending",  # Status default
-            "created_at": datetime.utcnow()
+            "created_at": datetime.utcnow(),
         }
-        
+
         # Simpan ke database
         db.orders.insert_one(order)
-        
-        return jsonify({"status": "success", "message": "Order created successfully"}), 201
+
+        return (
+            jsonify({"status": "success", "message": "Order created successfully"}),
+            201,
+        )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-
 
 
 # endpoint get order by username
@@ -378,6 +387,9 @@ def admin_required(f):
             return redirect("/login")
         except jwt.InvalidTokenError:
             return redirect("/login")
+
+        # ambil username dari session
+        request.username = data.get("id")
         return f(*args, **kwargs)
 
     return decorated_function
@@ -398,6 +410,7 @@ def dashboard():
 
     return render_template(
         "admin/pages/dashboard.html",
+        username=request.username,
         total_keuntungan=total_keuntungan,
         total_users=total_users,
         total_orders=total_orders,
@@ -413,7 +426,11 @@ def users_table():
     users_list = list(db.users.find({}))
 
     # mengirim tabel pengguna
-    return render_template("admin/pages/users.html", users=users_list)
+    return render_template(
+        "admin/pages/users.html",
+        users=users_list,
+        username=request.username,
+    )
 
 
 # endpoint dashboard create users
@@ -444,11 +461,15 @@ def create_user():
         return jsonify({"result": "success", "msg": "Data User Successfully Added!"})
 
     # merender ke halaman create user
-    return render_template("admin/pages/create_user.html")
+    return render_template(
+        "admin/pages/create_user.html",
+        username=request.username,
+    )
 
 
 # endpoint dashboard edit users
 @app.route("/admin/user/edit/<id>", methods=["GET", "POST"])
+@admin_required
 def edit_user(id):
     # permintaan menggunakan method GET
     if request.method == "GET":
@@ -456,7 +477,9 @@ def edit_user(id):
         user_id = db.users.find_one({"_id": ObjectId(id)})
 
         # render ke halaman edit user dengan id user
-        return render_template("admin/pages/edit_user.html", user=user_id)
+        return render_template(
+            "admin/pages/edit_user.html", user=user_id, username=request.username
+        )
 
     # permintaan menggunakan method POST
     if request.method == "POST":
@@ -482,6 +505,7 @@ def edit_user(id):
 
 # endpoint dashboard delete user
 @app.route("/admin/user/delete", methods=["POST"])
+@admin_required
 def delete_user():
     # mengambil id user yang akan dihapus
     id_receive = request.form["id_give"]
@@ -499,7 +523,11 @@ def products_table():
     products = list(db.products.find())
     for product in products:
         product["_id"] = str(product["_id"])
-    return render_template("admin/pages/products.html", products=products)
+    return render_template(
+        "admin/pages/products.html",
+        products=products,
+        username=request.username,
+    )
 
 
 # endpoint dashboard create products
@@ -537,11 +565,15 @@ def create_product():
         return jsonify({"result": "success", "msg": "Product successfully created!"})
 
     # Menampilkan halaman form
-    return render_template("admin/pages/create_product.html")
+    return render_template(
+        "admin/pages/create_product.html",
+        username=request.username,
+    )
 
 
 # Rute untuk mengedit produk
 @app.route("/admin/product/edit/<string:product_id>", methods=["GET", "POST"])
+@admin_required
 def edit_product(product_id):
     # Ambil data produk dari database
     product = db.products.find_one({"_id": ObjectId(product_id)})
@@ -556,7 +588,10 @@ def edit_product(product_id):
     if request.method == "GET":
         # Render halaman edit produk dengan data produk yang ada
         return render_template(
-            "admin/pages/edit_product.html", product=product, categories=categories
+            "admin/pages/edit_product.html",
+            product=product,
+            categories=categories,
+            username=request.username,
         )
 
     # Jika permintaan menggunakan method POST (untuk update produk)
@@ -595,6 +630,7 @@ def edit_product(product_id):
 
 # Endpoint untuk menghapus produk
 @app.route("/admin/product/delete", methods=["POST"])
+@admin_required
 def delete_product():
     product_id = request.form.get("id_give")  # Mendapatkan ID produk yang akan dihapus
 
@@ -635,11 +671,16 @@ def orders_table():
 
         order["customer_name"] = order.get("customer_name", "Unknown")
 
-    return render_template("admin/pages/orders.html", orders=orders)
+    return render_template(
+        "admin/pages/orders.html",
+        orders=orders,
+        username=request.username,
+    )
 
 
 # Route untuk mengupdate status order
 @app.route("/admin/order/update_status", methods=["POST"])
+@admin_required
 def update_order_status():
     order_id = request.form.get("order_id")
     status = request.form.get("status")

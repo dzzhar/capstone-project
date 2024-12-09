@@ -189,6 +189,9 @@
           closeButton.addEventListener("click", function () {
             window.location.href = "/admin/users";
           });
+        } else {
+          $("#usernameErrorMessage").removeClass("d-none");
+          $("#usernameErrorMessage .usernameErrorText").text(response.msg);
         }
       },
     });
