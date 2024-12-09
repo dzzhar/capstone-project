@@ -304,7 +304,9 @@ def cart(username):
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return redirect(url_for("login"))
-    
+
+
+# endpoint place order
 @app.route("/place_order", methods=["POST"])
 def place_order():
     data = request.get_json()
@@ -314,13 +316,13 @@ def place_order():
         return jsonify({"status": "error", "message": "Nama, alamat, dan item harus diisi"}), 400
 
     try:
-      
+        # Buat data pesanan
         order = {
             "customer_name": data["name"],
             "customer_address": data["address"],
             "products": data["products"],
             "total_price": sum(item["price"] * item["quantity"] for item in data["products"]),
-            "status": "pending",  
+            "status": "pending",  # Status default
             "created_at": datetime.utcnow()
         }
         
@@ -332,6 +334,33 @@ def place_order():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+
+# endpoint get order by username
+@app.route("/order/<username>")
+def order(username):
+    token_receive = request.cookies.get("mytoken")
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+
+        # Pastikan username di URL cocok dengan ID di token
+        if username != payload["id"]:
+            return redirect(url_for("login"))
+
+        user_info = db.users.find_one({"username": username})
+        orders = db.orders.find_one({"username": username})
+
+        if not orders:
+            print(f"No order found for {username}")  # Debugging log
+
+        return render_template(
+            "home/pages/orders.html",
+            user_info=user_info,
+            is_logged_in=True,
+            orders=orders,
+        )
+
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("login"))
 
 
 """ ------ DASHBOARD ADMIN SECTION ------ """
@@ -362,7 +391,7 @@ def dashboard():
     total_products = db.products.count_documents({})
     total_orders = db.orders.count_documents({})
     total_keuntungan = 0
-    
+
     orders_done = db.orders.find({"status": "done"})
     for order in orders_done:
         total_keuntungan += float(order.get("total_price", 0))
@@ -372,7 +401,7 @@ def dashboard():
         total_keuntungan=total_keuntungan,
         total_users=total_users,
         total_orders=total_orders,
-        total_products=total_products
+        total_products=total_products,
     )
 
 
@@ -585,32 +614,28 @@ def delete_product():
 @admin_required
 def orders_table():
     orders = list(db.orders.find())
-    
+
     # Mengonversi ObjectId menjadi string dan menambahkan beberapa data tambahan
     for order in orders:
         order["_id"] = str(order["_id"])
-        
-        
-        if "purchased_on" not in order:
-            order["purchased_on"] = datetime.utcnow()  
 
-        
+        if "purchased_on" not in order:
+            order["purchased_on"] = datetime.utcnow()
+
         total_price = 0
         for product in order.get("products", []):
             product_price = int(product.get("price", 0))
             product_quantity = int(product.get("quantity", 0))
             total_price += product_price * product_quantity
         order["total_price"] = total_price
-        
-       
-        order["total_quantity"] = sum(int(product.get("quantity", 0)) for product in order.get("products", []))
-        
-       
+
+        order["total_quantity"] = sum(
+            int(product.get("quantity", 0)) for product in order.get("products", [])
+        )
+
         order["customer_name"] = order.get("customer_name", "Unknown")
-    
+
     return render_template("admin/pages/orders.html", orders=orders)
-
-
 
 
 # Route untuk mengupdate status order
@@ -629,14 +654,17 @@ def update_order_status():
 @admin_required
 def delete_order():
     order_id = request.form.get("order_id")
-    
+
     if not order_id:
         return jsonify({"status": "error", "message": "Order ID is required"}), 400
 
     try:
         # Menghapus order dari database
         db.orders.delete_one({"_id": ObjectId(order_id)})
-        return jsonify({"status": "success", "message": "Order deleted successfully!"}), 200
+        return (
+            jsonify({"status": "success", "message": "Order deleted successfully!"}),
+            200,
+        )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
