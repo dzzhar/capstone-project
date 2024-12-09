@@ -47,7 +47,7 @@
     <div class="d-flex justify-content-between mb-3">
       <span class="fw-bold text-primary">Total</span>
       <span class="fw-bold text-primary">
-        <span id="total">Rp. 50.000</span>
+        <span id="total">Rp. 0</span>
       </span>
     </div>
     <a
@@ -55,10 +55,47 @@
       id="whatsappOrder"
       class="btn btn-success w-100 rounded-pill"
       target="_blank"
+      onclick="placeOrder()"
     >
       Pesan Sekarang via WhatsApp
     </a>
   </div>
 </div>
+<script>
+  function placeOrder() {
+    const orderData = {
+  products: [],  // Pastikan array produk ini diisi dengan benar
+  total_price: document.getElementById('total').innerText.replace('Rp. ', '').replace('.', ''),  // Harga total
+};
 
+// Pastikan setiap produk memiliki atribut yang sesuai
+document.querySelectorAll('.cart-item').forEach(function(item) {
+  const product = {
+    name: item.querySelector('.text-primary').innerText.trim(),  // Nama produk
+    quantity: item.querySelector('.jumlah-item').innerText.trim(),  // Jumlah
+    price: item.getAttribute('data-harga'),  // Harga per item
+  };
+  orderData.products.push(product);
+});
+
+
+  
+  $.ajax({
+    type: 'POST',
+    url: '/place_order',
+    data: JSON.stringify(orderData),
+    contentType: 'application/json',
+    success: function(response) {
+      console.log('Pesanan berhasil ditambahkan');
+      window.location.href = 'https://wa.me/628997626200?text=' + encodeURIComponent(response.whatsapp_message);
+    },
+    error: function(error) {
+      console.error('Error saat memesan', error);
+    }
+  });
+}
+
+
+
+</script>
 {% endblock %}
