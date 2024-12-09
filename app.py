@@ -365,18 +365,20 @@ def admin_required(f):
 def dashboard():
     total_users = db.users.count_documents({})
     total_products = db.products.count_documents({})
-    total_orders = db.orders.count_documents({})  # Menghitung total jumlah order
-    
+    total_orders = db.orders.count_documents({})
     total_keuntungan = 0
 
-    # Menghitung keuntungan dari order yang sudah selesai
     orders_done = db.orders.find({"status": "done"})
     for order in orders_done:
-        total_keuntungan += float(order["total_price"])  # Pastikan total_price adalah angka
+        total_keuntungan += float(order.get("total_price", 0))
 
-    # Lanjutkan dengan logika lainnya
-    return render_template("admin/pages/dashboard.html", total_keuntungan=total_keuntungan, total_users=total_users, total_orders=total_orders, total_products=total_products)
-
+    return render_template(
+        "admin/pages/dashboard.html",
+        total_keuntungan=total_keuntungan,
+        total_users=total_users,
+        total_orders=total_orders,
+        total_products=total_products
+)
 
 
 # endpoint dashboard table users
