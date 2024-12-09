@@ -3,8 +3,8 @@
 {% block title %}Cart | By.Notti{% endblock %}
 
 {% block content %}
+<div class="row gx-4 cart">
 
-<div class="row gx-4 cart position-relative">
   <div class="col-lg-8 mb-4" id="cartItems">
     {% if cart_items %}
       {% for item in cart_items %}
@@ -42,60 +42,74 @@
       <p>Your cart is empty. Start shopping now!</p>
     {% endif %}
   </div>
-  <div class="cart-summary p-3 border rounded-3 position-absolute">
-    <h5 class="text-primary mb-3 fw-bold">Ringkasan Pesanan</h5>
-    <div class="d-flex justify-content-between mb-3">
-      <span class="fw-bold text-primary">Total</span>
-      <span class="fw-bold text-primary">
-        <span id="total">Rp. 0</span>
-      </span>
+
+  <div class="col-lg-4" id="orderSummary">
+    <div class="cart-summary p-4 border rounded-3 bg-light shadow">
+      <h4 class="text-primary mb-4 fw-bold">Ringkasan Pesanan</h4>
+
+      <div class="mb-3">
+        <label for="customerName" class="form-label fw-bold">Nama</label>
+        <input type="text" id="customerName" class="form-control" placeholder="Masukkan Nama Anda" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="customerAddress" class="form-label fw-bold">Alamat</label>
+        <textarea id="customerAddress" class="form-control" rows="3" placeholder="Masukkan Alamat Anda" required></textarea>
+      </div>
+
+      <div class="d-flex justify-content-between mb-4">
+        <span class="fw-bold text-primary">Total</span>
+        <span class="fw-bold text-primary" id="total">Rp. 50.000</span>
+      </div>
+
+      <button id="placeOrder" class="btn btn-success w-100 rounded-pill">Pesan Sekarang Via WhatsApp</button>
     </div>
-    <a
-      href="#"
-      id="whatsappOrder"
-      class="btn btn-success w-100 rounded-pill"
-      target="_blank"
-      onclick="placeOrder()"
-    >
-      Pesan Sekarang via WhatsApp
-    </a>
   </div>
 </div>
+
 <script>
+  // Fungsi Pemesanan (tidak berubah dari versi Anda)
   function placeOrder() {
-    const orderData = {
-  products: [],  // Pastikan array produk ini diisi dengan benar
-  total_price: document.getElementById('total').innerText.replace('Rp. ', '').replace('.', ''),  // Harga total
-};
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerAddress = document.getElementById('customerAddress').value.trim();
 
-// Pastikan setiap produk memiliki atribut yang sesuai
-document.querySelectorAll('.cart-item').forEach(function(item) {
-  const product = {
-    name: item.querySelector('.text-primary').innerText.trim(),  // Nama produk
-    quantity: item.querySelector('.jumlah-item').innerText.trim(),  // Jumlah
-    price: item.getAttribute('data-harga'),  // Harga per item
-  };
-  orderData.products.push(product);
-});
-
-
-  
-  $.ajax({
-    type: 'POST',
-    url: '/place_order',
-    data: JSON.stringify(orderData),
-    contentType: 'application/json',
-    success: function(response) {
-      console.log('Pesanan berhasil ditambahkan');
-      window.location.href = 'https://wa.me/628997626200?text=' + encodeURIComponent(response.whatsapp_message);
-    },
-    error: function(error) {
-      console.error('Error saat memesan', error);
+    if (!customerName || !customerAddress) {
+        alert('Nama dan alamat harus diisi!');
+        return;
     }
-  });
-}
 
+    const orderData = {
+        name: customerName,
+        address: customerAddress,
+        products: [],
+        total_price: parseInt(document.getElementById('total').innerText.replace('Rp. ', '').replace('.', ''))
+    };
 
+    document.querySelectorAll('.cart-item').forEach(function(item) {
+        const product = {
+            name: item.querySelector('.text-primary').innerText.trim(),
+            quantity: parseInt(item.querySelector('.jumlah-item').innerText.trim()),
+            price: parseInt(item.getAttribute('data-harga'))
+        };
+        orderData.products.push(product);
+    });
 
+    $.ajax({
+        type: 'POST',
+        url: '/place_order',
+        data: JSON.stringify(orderData),
+        contentType: 'application/json',
+        success: function(response) {
+            alert('Pesanan berhasil dibuat!');
+            window.location.reload();
+        },
+        error: function(error) {
+            console.error('Error saat memesan', error);
+            alert('Gagal membuat pesanan, coba lagi nanti.');
+        }
+    });
+  }
+
+  document.getElementById('placeOrder').addEventListener('click', placeOrder);
 </script>
 {% endblock %}

@@ -305,37 +305,32 @@ def cart(username):
     except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return redirect(url_for("login"))
     
-@app.route('/place_order', methods=['POST'])
+@app.route("/place_order", methods=["POST"])
 def place_order():
-    # Ambil data pesanan dari request
-    order_data = request.get_json()
+    data = request.get_json()
+    
+    # Validasi data
+    if not data.get("name") or not data.get("address") or not data.get("products"):
+        return jsonify({"status": "error", "message": "Nama, alamat, dan item harus diisi"}), 400
 
-    # Pastikan order_data berisi produk
-    if not order_data['products']:
-        return jsonify({'error': 'Produk kosong'}), 400
+    try:
+      
+        order = {
+            "customer_name": data["name"],
+            "customer_address": data["address"],
+            "products": data["products"],
+            "total_price": sum(item["price"] * item["quantity"] for item in data["products"]),
+            "status": "pending",  
+            "created_at": datetime.utcnow()
+        }
+        
+        # Simpan ke database
+        db.orders.insert_one(order)
+        
+        return jsonify({"status": "success", "message": "Order created successfully"}), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-    # Persiapkan dokumen pesanan untuk disimpan
-    order_document = {
-        'products': order_data['products'],
-        'total_price': order_data['total_price'],
-        'status': 'pending',  # Status default
-        'ordered_on': datetime.utcnow(),
-    }
-
-    # Masukkan pesanan ke dalam database
-    order_id = db.orders.insert_one(order_document).inserted_id
-
-    # Kembalikan response dengan pesan WhatsApp
-    whatsapp_message = f"Detail Pesanan: \n"
-    for product in order_data['products']:
-        whatsapp_message += f"{product['name']} (x{product['quantity']}) - Rp. {product['price']} \n"
-    whatsapp_message += f"Total Harga: Rp. {order_data['total_price']}"
-
-    # Kembalikan response dengan pesan WhatsApp
-    return jsonify({
-        'success': True,
-        'whatsapp_message': whatsapp_message
-    })
 
 
 
@@ -365,18 +360,20 @@ def admin_required(f):
 def dashboard():
     total_users = db.users.count_documents({})
     total_products = db.products.count_documents({})
-    total_orders = db.orders.count_documents({})  # Menghitung total jumlah order
-    
+    total_orders = db.orders.count_documents({})
     total_keuntungan = 0
-
-    # Menghitung keuntungan dari order yang sudah selesai
+    
     orders_done = db.orders.find({"status": "done"})
     for order in orders_done:
-        total_keuntungan += float(order["total_price"])  # Pastikan total_price adalah angka
+        total_keuntungan += float(order.get("total_price", 0))
 
-    # Lanjutkan dengan logika lainnya
-    return render_template("admin/pages/dashboard.html", total_keuntungan=total_keuntungan, total_users=total_users, total_orders=total_orders, total_products=total_products)
-
+    return render_template(
+        "admin/pages/dashboard.html",
+        total_keuntungan=total_keuntungan,
+        total_users=total_users,
+        total_orders=total_orders,
+        total_products=total_products
+    )
 
 
 # endpoint dashboard table users
