@@ -304,22 +304,24 @@ def cart(username):
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return redirect(url_for("login"))
-    
-@app.route('/place_order', methods=['POST'])
+
+
+# endpoint place order
+@app.route("/place_order", methods=["POST"])
 def place_order():
     # Ambil data pesanan dari request
     order_data = request.get_json()
 
     # Pastikan order_data berisi produk
-    if not order_data['products']:
-        return jsonify({'error': 'Produk kosong'}), 400
+    if not order_data["products"]:
+        return jsonify({"error": "Produk kosong"}), 400
 
     # Persiapkan dokumen pesanan untuk disimpan
     order_document = {
-        'products': order_data['products'],
-        'total_price': order_data['total_price'],
-        'status': 'pending',  # Status default
-        'ordered_on': datetime.utcnow(),
+        "products": order_data["products"],
+        "total_price": order_data["total_price"],
+        "status": "pending",  # Status default
+        "ordered_on": datetime.utcnow(),
     }
 
     # Masukkan pesanan ke dalam database
@@ -327,16 +329,42 @@ def place_order():
 
     # Kembalikan response dengan pesan WhatsApp
     whatsapp_message = f"Detail Pesanan: \n"
-    for product in order_data['products']:
-        whatsapp_message += f"{product['name']} (x{product['quantity']}) - Rp. {product['price']} \n"
+    for product in order_data["products"]:
+        whatsapp_message += (
+            f"{product['name']} (x{product['quantity']}) - Rp. {product['price']} \n"
+        )
     whatsapp_message += f"Total Harga: Rp. {order_data['total_price']}"
 
     # Kembalikan response dengan pesan WhatsApp
-    return jsonify({
-        'success': True,
-        'whatsapp_message': whatsapp_message
-    })
+    return jsonify({"success": True, "whatsapp_message": whatsapp_message})
 
+
+# endpoint get order by username
+@app.route("/order/<username>")
+def order(username):
+    token_receive = request.cookies.get("mytoken")
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+
+        # Pastikan username di URL cocok dengan ID di token
+        if username != payload["id"]:
+            return redirect(url_for("login"))
+
+        user_info = db.users.find_one({"username": username})
+        orders = db.orders.find_one({"username": username})
+
+        if not orders:
+            print(f"No order found for {username}")  # Debugging log
+
+        return render_template(
+            "home/pages/orders.html",
+            user_info=user_info,
+            is_logged_in=True,
+            orders=orders,
+        )
+
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("login"))
 
 
 """ ------ DASHBOARD ADMIN SECTION ------ """
@@ -365,18 +393,20 @@ def admin_required(f):
 def dashboard():
     total_users = db.users.count_documents({})
     total_products = db.products.count_documents({})
-    total_orders = db.orders.count_documents({})  # Menghitung total jumlah order
-    
+    total_orders = db.orders.count_documents({})
     total_keuntungan = 0
 
-    # Menghitung keuntungan dari order yang sudah selesai
     orders_done = db.orders.find({"status": "done"})
     for order in orders_done:
-        total_keuntungan += float(order["total_price"])  # Pastikan total_price adalah angka
+        total_keuntungan += float(order.get("total_price", 0))
 
-    # Lanjutkan dengan logika lainnya
-    return render_template("admin/pages/dashboard.html", total_keuntungan=total_keuntungan, total_users=total_users, total_orders=total_orders, total_products=total_products)
-
+    return render_template(
+        "admin/pages/dashboard.html",
+        total_keuntungan=total_keuntungan,
+        total_users=total_users,
+        total_orders=total_orders,
+        total_products=total_products,
+    )
 
 
 # endpoint dashboard table users
@@ -588,32 +618,28 @@ def delete_product():
 @admin_required
 def orders_table():
     orders = list(db.orders.find())
-    
+
     # Mengonversi ObjectId menjadi string dan menambahkan beberapa data tambahan
     for order in orders:
         order["_id"] = str(order["_id"])
-        
-        
-        if "purchased_on" not in order:
-            order["purchased_on"] = datetime.utcnow()  
 
-        
+        if "purchased_on" not in order:
+            order["purchased_on"] = datetime.utcnow()
+
         total_price = 0
         for product in order.get("products", []):
             product_price = int(product.get("price", 0))
             product_quantity = int(product.get("quantity", 0))
             total_price += product_price * product_quantity
         order["total_price"] = total_price
-        
-       
-        order["total_quantity"] = sum(int(product.get("quantity", 0)) for product in order.get("products", []))
-        
-       
+
+        order["total_quantity"] = sum(
+            int(product.get("quantity", 0)) for product in order.get("products", [])
+        )
+
         order["customer_name"] = order.get("customer_name", "Unknown")
-    
+
     return render_template("admin/pages/orders.html", orders=orders)
-
-
 
 
 # Route untuk mengupdate status order
@@ -632,14 +658,17 @@ def update_order_status():
 @admin_required
 def delete_order():
     order_id = request.form.get("order_id")
-    
+
     if not order_id:
         return jsonify({"status": "error", "message": "Order ID is required"}), 400
 
     try:
         # Menghapus order dari database
         db.orders.delete_one({"_id": ObjectId(order_id)})
-        return jsonify({"status": "success", "message": "Order deleted successfully!"}), 200
+        return (
+            jsonify({"status": "success", "message": "Order deleted successfully!"}),
+            200,
+        )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

@@ -1,101 +1,186 @@
 {% extends 'home/base.html' %}
 
+<!-- title -->
 {% block title %}Cart | By.Notti{% endblock %}
 
+<!-- content -->
 {% block content %}
+<div class="container">
+  <div class="row gx-4 cart">
+    <nav>
+      <div class="nav nav-tabs mb-5" id="nav-tab" role="tablist">
+        <a
+          class="nav-link active text-primary"
+          id="nav-home-tab"
+          href="{{ url_for('cart', username=user_info['username']) }}"
+          type="button"
+          role="tab"
+          aria-controls="nav-home"
+          aria-selected="true"
+        >
+          <h2>My Carts</h2>
+        </a>
+        <a
+          class="nav-link text-muted"
+          id="nav-home-tab"
+          href="{{ url_for('order', username=user_info['username']) }}"
+          type="button"
+          role="tab"
+          aria-controls="nav-home"
+          aria-selected="true"
+        >
+          <h2>My Orders</h2>
+        </a>
+      </div>
+    </nav>
 
-<div class="row gx-4 cart position-relative">
-  <div class="col-lg-8 mb-4" id="cartItems">
     {% if cart_items %}
+    <!-- Bagian Item Keranjang -->
+    <div class="col-lg-8 mb-4" id="cartItems">
       {% for item in cart_items %}
-      <div class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center" data-harga="{{ item.price }}">
+      <div
+        class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center"
+        data-harga="{{ item.price }}"
+      >
         <img
           src="{{ url_for('static', filename='images/' ~ item.image) }}"
-          alt="{{ item.product_name }}"
+          alt="Gambar Produk"
           class="img-fluid rounded me-3 object-fit-cover"
           style="width: 100px; height: 100px"
         />
-        <div class="flex-grow-1 d-flex justify-content-between">
-          <div>
-            <h5 class="mb-2 text-primary fw-bold">{{ item.product_name }}</h5>
+
+        <div class="d-flex flex-column flex-grow-1">
+          <!-- Nama Produk dan Harga -->
+          <div
+            class="d-flex flex-column flex-md-row gap-1 align-items-start align-items-md-start justify-content-between mb-1"
+          >
+            <h5 class="text-primary fw-bold text-capitalize">
+              {{ item.product_name }}
+            </h5>
+            <h6 class="text-primary fw-bold">
+              <span class="harga-item">{{ item.price | format_idr }}</span>
+            </h6>
+          </div>
+
+          <!-- Quantity dan Tombol Hapus -->
+          <div class="d-flex gap-1 justify-content-between">
             <div class="d-flex align-items-center">
-              <span class="text-muted me-3 d-none d-md-block">Quantity</span>
+              <span class="text-muted me-2 d-none d-md-block">Quantity</span>
               <div class="d-flex align-items-center border-number">
-                <button class="minus-btn" onclick="updateQuantity('minus', {{ item.id }})">-</button>
+                <button
+                  class="minus-btn"
+                  onclick="updateQuantity('minus', {{ item.id }})"
+                >
+                  -
+                </button>
                 <p class="jumlah-item">{{ item.quantity }}</p>
-                <button class="plus-btn" onclick="updateQuantity('plus', {{ item.id }})">+</button>
+                <button
+                  class="plus-btn"
+                  onclick="updateQuantity('plus', {{ item.id }})"
+                >
+                  +
+                </button>
               </div>
             </div>
-          </div>
-          <div class="d-flex flex-column align-items-end justify-content-between">
-            <h5 class="mb-2 text-primary fw-bold">
-              <span class="harga-item">Rp. {{ '{:,.0f}'.format(item.price | int) }}</span>
-            </h5>
-            <button class="btn btn-danger btn-sm hapus-item" onclick="removeItem({{ item.id }})">
+            <button
+              class="btn btn-danger btn-sm ms-auto hapus-item"
+              onclick="removeItem({{ item.id }})"
+            >
               <i class="bx bx-trash"></i>
             </button>
           </div>
         </div>
       </div>
       {% endfor %}
+    </div>
+
+    <!-- Bagian Ringkasan Pesanan -->
+    <div class="col-lg-4 col-md-12">
+      <div class="p-3 border rounded-3">
+        <h5 class="text-primary mb-4 fw-bold">Shipping Information</h5>
+        <form id="orderForm">
+          <div class="mb-3">
+            <label for="fullname" class="form-label text-primary"
+              >Fullname</label
+            >
+            <input type="text" class="form-control" id="fullname" required />
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label text-primary">Address</label>
+            <textarea
+              class="form-control"
+              id="address"
+              style="height: 80px; resize: none"
+              required
+            ></textarea>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3 mt-4">
+            <span class="fw-bold text-primary">Grand Total:</span>
+            <span class="fw-bold text-primary" id="totalCart"
+              >{{ total_price | format_idr }}</span
+            >
+          </div>
+
+          <a
+            href="#"
+            id="whatsappOrder"
+            class="btn btn-success w-100 rounded-pill"
+            target="_blank"
+            onclick="placeOrder()"
+          >
+            Order now via WhatsApp
+          </a>
+        </form>
+      </div>
+    </div>
+
     {% else %}
-      <p>Your cart is empty. Start shopping now!</p>
+    <div class="text-center">
+      <p class="text-muted">Your cart is empty.</p>
+      <a href="{{ url_for('products') }}" class="btn btn-primary">
+        Start Shopping
+      </a>
+    </div>
     {% endif %}
   </div>
-  <div class="cart-summary p-3 border rounded-3 position-absolute">
-    <h5 class="text-primary mb-3 fw-bold">Ringkasan Pesanan</h5>
-    <div class="d-flex justify-content-between mb-3">
-      <span class="fw-bold text-primary">Total</span>
-      <span class="fw-bold text-primary">
-        <span id="total">Rp. 0</span>
-      </span>
-    </div>
-    <a
-      href="#"
-      id="whatsappOrder"
-      class="btn btn-success w-100 rounded-pill"
-      target="_blank"
-      onclick="placeOrder()"
-    >
-      Pesan Sekarang via WhatsApp
-    </a>
-  </div>
-</div>
-<script>
-  function placeOrder() {
-    const orderData = {
-  products: [],  // Pastikan array produk ini diisi dengan benar
-  total_price: document.getElementById('total').innerText.replace('Rp. ', '').replace('.', ''),  // Harga total
-};
 
-// Pastikan setiap produk memiliki atribut yang sesuai
-document.querySelectorAll('.cart-item').forEach(function(item) {
-  const product = {
-    name: item.querySelector('.text-primary').innerText.trim(),  // Nama produk
-    quantity: item.querySelector('.jumlah-item').innerText.trim(),  // Jumlah
-    price: item.getAttribute('data-harga'),  // Harga per item
-  };
-  orderData.products.push(product);
-});
+  <script>
+    function placeOrder() {
+      const orderData = {
+        products: [], // Pastikan array produk ini diisi dengan benar
+        total_price: document
+          .getElementById("total")
+          .innerText.replace("Rp. ", "")
+          .replace(".", ""), // Harga total
+      };
 
+      // Pastikan setiap produk memiliki atribut yang sesuai
+      document.querySelectorAll(".cart-item").forEach(function (item) {
+        const product = {
+          name: item.querySelector(".text-primary").innerText.trim(), // Nama produk
+          quantity: item.querySelector(".jumlah-item").innerText.trim(), // Jumlah
+          price: item.getAttribute("data-harga"), // Harga per item
+        };
+        orderData.products.push(product);
+      });
 
-  
-  $.ajax({
-    type: 'POST',
-    url: '/place_order',
-    data: JSON.stringify(orderData),
-    contentType: 'application/json',
-    success: function(response) {
-      console.log('Pesanan berhasil ditambahkan');
-      window.location.href = 'https://wa.me/628997626200?text=' + encodeURIComponent(response.whatsapp_message);
-    },
-    error: function(error) {
-      console.error('Error saat memesan', error);
+      $.ajax({
+        type: "POST",
+        url: "/place_order",
+        data: JSON.stringify(orderData),
+        contentType: "application/json",
+        success: function (response) {
+          console.log("Pesanan berhasil ditambahkan");
+          window.location.href =
+            "https://wa.me/628997626200?text=" +
+            encodeURIComponent(response.whatsapp_message);
+        },
+        error: function (error) {
+          console.error("Error saat memesan", error);
+        },
+      });
     }
-  });
-}
-
-
-
-</script>
-{% endblock %}
+  </script>
+  {% endblock %}
+</div>
