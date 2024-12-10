@@ -1,0 +1,122 @@
+{% extends 'home/base.html' %}
+
+<!-- title -->
+{% block title %}Orders | By.Notti{% endblock %}
+
+<!-- content -->
+{% block content %}
+<div class="container">
+  <div class="row gx-4 cart">
+    <nav>
+      <div class="nav nav-tabs mb-5" id="nav-tab" role="tablist">
+        <a
+          class="nav-link text-muted"
+          id="nav-home-tab"
+          href="{{ url_for('cart', username=user_info['username']) }}"
+          type="button"
+          role="tab"
+          aria-controls="nav-home"
+          aria-selected="true"
+        >
+          <h2>My Carts</h2>
+        </a>
+        <a
+          class="nav-link active text-primary"
+          id="nav-home-tab"
+          href="{{ url_for('cart', username=user_info['username']) }}"
+          type="button"
+          role="tab"
+          aria-controls="nav-home"
+          aria-selected="true"
+        >
+          <h2>My Orders</h2>
+        </a>
+      </div>
+    </nav>
+
+    {% if orders %}
+    <!-- contact whatsapp -->
+    <div class="row gx-4 d-flex flex-lg-row-reverse">
+      <div class="col-lg-4 col-md-12 mb-4">
+        <div class="p-3 border rounded-3">
+          <h5 class="text-primary mb-4 fw-bold">Send us a message</h5>
+          <p>
+            If you cannot find the answer, please explain your problem.
+            Solutions will be provided promptly.
+          </p>
+
+          <a
+            href="https://wa.me/6285183338861"
+            class="btn btn-success w-100 rounded-pill"
+            target="_blank"
+          >
+            Send us a message
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-8 mb-4">
+        <div class="p-3 border rounded-3 text-primary">
+          <div class="d-flex gap-5 border-bottom mb-4">
+            <div>
+              <p class="mb-0 text-muted">Order on</p>
+              <h6 class="fw-bold">{{ orders.order_date }}</h6>
+            </div>
+            <div>
+              <p class="mb-0 text-muted">Total</p>
+              <h6 class="fw-bold">{{ orders.total }}</h6>
+            </div>
+            <div>
+              <p class="mb-0 text-muted">Ship to</p>
+              <h6 class="fw-bold">{{ orders.customer }}</h6>
+            </div>
+          </div>
+
+          <div class="cart-item mb-3 d-flex align-items-center pt-4">
+            <img
+              src="{{ url_for('static', filename='images/' ~ orders.image) }}"
+              alt="Gambar Produk"
+              class="img-fluid rounded me-3 object-fit-cover"
+              style="width: 100px; height: 100px"
+            />
+
+            {% for product in orders.products %}
+            <div class="d-flex flex-column">
+              <!-- Nama Produk -->
+              <h5 class="text-primary fw-bold text-capitalize mb-2">
+                {{ product.name }}
+              </h5>
+
+              <!-- Harga dan Quantity -->
+              <div class="d-flex align-items-center mb-2">
+                <h6 class="text-primary fw-bold mb-0">
+                  {{ product.price | format_idr}}
+                  <span class="ms-3 fw-normal text-muted"
+                    >Quantity {{ product.quantity }}</span
+                  >
+                </h6>
+              </div>
+              {% endfor %}
+
+              <!-- Badge Status -->
+              <span
+                class="badge w-auto align-self-start text-wrap mt-2 text-capitalize {% if orders.status == 'pending' %} text-bg-warning {% elif orders.status == 'on process' %}text-bg-primary{% elif orders.status == 'done' %} text-bg-success {% endif %}"
+              >
+                {{ orders.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="text-center">
+          <p class="text-muted">You haven't ordered anything.</p>
+          <a href="{{ url_for('products') }}" class="btn btn-primary">
+            Start Shopping
+          </a>
+        </div>
+        {% endif %} {% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
