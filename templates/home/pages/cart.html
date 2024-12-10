@@ -100,16 +100,16 @@
         <h5 class="text-primary mb-4 fw-bold">Shipping Information</h5>
         <form id="orderForm">
           <div class="mb-3">
-            <label for="fullname" class="form-label text-primary"
+            <label for="customerName" class="form-label text-primary"
               >Fullname</label
             >
-            <input type="text" class="form-control" id="fullname" required />
+            <input type="text" class="form-control" id="customerName" required />
           </div>
           <div class="mb-3">
-            <label for="address" class="form-label text-primary">Address</label>
+            <label for="customerAddress" class="form-label text-primary">Address</label>
             <textarea
               class="form-control"
-              id="address"
+              id="customerAddress"
               style="height: 80px; resize: none"
               required
             ></textarea>
@@ -117,9 +117,7 @@
 
           <div class="d-flex justify-content-between mb-3 mt-4">
             <span class="fw-bold text-primary">Grand Total:</span>
-            <span class="fw-bold text-primary" id="totalCart"
-              >{{ total_price | format_idr }}</span
-            >
+            <span class="fw-bold text-primary" id="total">Rp. 0</span>
           </div>
 
           <a
@@ -147,40 +145,56 @@
 
   <script>
     function placeOrder() {
-      const orderData = {
-        products: [], // Pastikan array produk ini diisi dengan benar
-        total_price: document
-          .getElementById("total")
-          .innerText.replace("Rp. ", "")
-          .replace(".", ""), // Harga total
-      };
+    // Ambil data dari form
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerAddress = document.getElementById('customerAddress').value.trim();
 
-      // Pastikan setiap produk memiliki atribut yang sesuai
-      document.querySelectorAll(".cart-item").forEach(function (item) {
+    if (!customerName || !customerAddress) {
+        alert('Nama dan alamat harus diisi!');
+        return;
+    }
+
+    // Siapkan data pesanan
+    const orderData = {
+        name: customerName, // Nama pelanggan
+        address: customerAddress, // Alamat pelanggan
+        products: [], // Array produk
+        total_price: parseInt(document.getElementById('total').innerText.replace('Rp. ', '').replace('.', '')) // Harga total
+    };
+
+    // Iterasi melalui setiap item di keranjang
+    document.querySelectorAll('.cart-item').forEach(function(item) {
         const product = {
-          name: item.querySelector(".text-primary").innerText.trim(), // Nama produk
-          quantity: item.querySelector(".jumlah-item").innerText.trim(), // Jumlah
-          price: item.getAttribute("data-harga"), // Harga per item
+            name: item.querySelector('.text-primary').innerText.trim(), // Nama produk
+            quantity: parseInt(item.querySelector('.jumlah-item').innerText.trim()), // Jumlah
+            price: parseInt(item.getAttribute('data-harga')) // Harga per item
         };
         orderData.products.push(product);
-      });
+    });
 
-      $.ajax({
-        type: "POST",
-        url: "/place_order",
+    // Kirim data pesanan ke backend menggunakan AJAX
+    $.ajax({
+        type: 'POST',
+        url: '/place_order',
         data: JSON.stringify(orderData),
-        contentType: "application/json",
-        success: function (response) {
-          console.log("Pesanan berhasil ditambahkan");
-          window.location.href =
-            "https://wa.me/628997626200?text=" +
-            encodeURIComponent(response.whatsapp_message);
+        contentType: 'application/json',
+        success: function(response) {
+            console.log('Pesanan berhasil ditambahkan');
+            // Opsional: Redirect ke halaman tertentu setelah berhasil
+            alert('Pesanan berhasil dibuat!');
+            window.location.reload(); // Kembali ke halaman keranjang
         },
-        error: function (error) {
-          console.error("Error saat memesan", error);
-        },
-      });
-    }
+        error: function(error) {
+            console.error('Error saat memesan', error);
+            alert('Gagal membuat pesanan, coba lagi nanti.');
+        }
+    });
+}
+
+// Tambahkan event listener ke tombol "Pesan Sekarang"
+document.getElementById('placeOrder').addEventListener('click', placeOrder);
+
+
   </script>
   {% endblock %}
 </div>

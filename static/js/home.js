@@ -40,13 +40,16 @@ function updateTotals() {
       parseInt(item.querySelector(".jumlah-item").textContent) || 0;
     const itemTotal = price * quantity;
 
+    // Update harga per item
     item.querySelector(".harga-item").textContent = formatCurrency(itemTotal);
     subtotal += itemTotal;
   });
 
+  // Update subtotal (Grand Total)
   document.getElementById("total").textContent = formatCurrency(subtotal);
 }
 
+// Tambahkan event listener untuk tombol plus, minus, dan hapus item
 document.querySelectorAll(".cart-item").forEach((item) => {
   const minusBtn = item.querySelector(".minus-btn");
   const plusBtn = item.querySelector(".plus-btn");
@@ -74,6 +77,11 @@ document.querySelectorAll(".hapus-item").forEach((button) => {
     updateTotals();
   });
 });
+
+// Hitung ulang total saat halaman dimuat
+document.addEventListener("DOMContentLoaded", updateTotals);
+
+
 
 document
   .getElementById("whatsappOrder")
