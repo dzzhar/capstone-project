@@ -70,18 +70,8 @@ document.querySelectorAll(".cart-item").forEach((item) => {
   });
 });
 
-document.querySelectorAll(".hapus-item").forEach((button) => {
-  button.addEventListener("click", function () {
-    const item = this.closest(".cart-item");
-    item.remove();
-    updateTotals();
-  });
-});
-
 // Hitung ulang total saat halaman dimuat
 document.addEventListener("DOMContentLoaded", updateTotals);
-
-
 
 document
   .getElementById("whatsappOrder")

@@ -181,6 +181,7 @@ def products():
         is_logged_in=is_logged_in,
         user_info=user_info,
         products=products,
+        username=user_info["username"] if user_info else None,
     )
 
 
@@ -260,7 +261,7 @@ def add_to_cart():
         db.carts.update_one({"username": username}, {"$set": {"items": items}})
 
     # Redirect ke halaman keranjang setelah sukses
-    return redirect(url_for("cart", username=username))
+    return jsonify({"result": "success", "msg": "Product added to cart."})
 
 
 # endpoint cart

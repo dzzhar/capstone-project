@@ -8,7 +8,7 @@
 <div class="container product-container">
   <!-- cookies & snacks category -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-6 mb-0 text-primary">Cookies & Snacks</h1>
+    <h2 class="mb-0 text-primary">Cookies & Snacks</h2>
     <div class="d-none d-md-flex">
       <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
       <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
@@ -17,29 +17,30 @@
   <div class="scrollable-container">
     {% for product in products %} {% if product.category == "cookies & snacks"
     %}
-    <a
-      href="{{ url_for('detail_product', id=product._id) }}"
-      class="pointer-event text-decoration-none"
-    >
-      <div class="product-card h-100">
+    <div class="product-card">
+      <a
+        href="{{ url_for('detail_product', id=product._id) }}"
+        class="pointer-event text-decoration-none"
+      >
         <img
           src="{{ url_for('static', filename='images/' ~ product.image) }}"
           alt="{{ product.product_name }}"
           class="object-fit-cover"
         />
-        <h5 class="mt-2 fw-bold text-capitalize text-primary display-6">
+        <h5 class="mt-2 text-capitalize text-primary display-6">
           {{ product.product_name }}
         </h5>
-        <h5 class="fw-bold">{{ product.price |format_idr }}</h5>
+        <p>{{ product.price |format_idr }}</p>
+      </a>
 
-        <form method="POST" action="{{ url_for('add_to_cart') }}" class="">
-          <input type="hidden" name="product_id" value="{{ product._id }}" />
-          <button type="submit" class="btn btn-primary w-100">
-            Add to cart
-          </button>
-        </form>
-      </div>
-    </a>
+      <button
+        type="button"
+        class="btn btn-primary w-100"
+        onclick="addToCart('{{ product._id }}')"
+      >
+        Add to cart
+      </button>
+    </div>
     {% endif %} {% endfor %}
   </div>
 
@@ -47,7 +48,7 @@
   <div
     class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
   >
-    <h1 class="display-6 mb-0 text-primary">Brownies</h1>
+    <h2 class="mb-0 text-primary">Brownies</h1>
     <div class="d-none d-md-flex">
       <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
       <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
@@ -55,26 +56,29 @@
   </div>
   <div class="scrollable-container">
     {% for product in products %} {% if product.category == "brownies" %}
-    <a
-      href="{{ url_for('detail_product', id=product._id) }}"
-      class="pointer-event text-decoration-none"
-    >
-      <div class="product-card">
+    <div class="product-card">
+      <a
+        href="{{ url_for('detail_product', id=product._id) }}"
+        class="pointer-event text-decoration-none"
+      >
         <img
           src="{{ url_for('static', filename='images/' ~ product.image) }}"
           alt="{{ product.product_name }}"
-          class="product-image"
+          class="object-fit-cover"
         />
-        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-        <p>{{ product.price }}</p>
-        <form method="POST" action="{{ url_for('add_to_cart') }}">
-          <input type="hidden" name="product_id" value="{{ product._id }}" />
-          <button type="submit" class="btn btn-primary w-100">
-            Add to cart
-          </button>
-        </form>
-      </div>
-    </a>
+        <h5 class="mt-2 text-capitalize text-primary display-6">
+          {{ product.product_name }}
+        </h5>
+        <p>{{ product.price |format_idr }}</p>
+      </a>
+      <button
+        type="button"
+        class="btn btn-primary w-100"
+        onclick="addToCart('{{ product._id }}')"
+      >
+        Add to cart
+      </button>
+    </div>
     {% endif %} {% endfor %}
   </div>
 
@@ -82,34 +86,39 @@
   <div
     class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
   >
-    <h1 class="display-6 mb-0 text-primary">Cakes</h1>
+    <h2 class="mb-0 text-primary">Cakes</h2>
     <div class="d-none d-md-flex">
       <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
       <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
   </div>
+
   <div class="scrollable-container">
     {% for product in products %} {% if product.category == "cakes" %}
-    <a
-      href="{{ url_for('detail_product', id=product._id) }}"
-      class="pointer-event text-decoration-none"
-    >
-      <div class="product-card">
+    <div class="product-card">
+      <a
+        href="{{ url_for('detail_product', id=product._id) }}"
+        class="pointer-event text-decoration-none"
+      >
         <img
           src="{{ url_for('static', filename='images/' ~ product.image) }}"
           alt="{{ product.product_name }}"
-          class="product-image"
+          class="object-fit-cover"
         />
-        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-        <p>{{ product.price }}</p>
-        <form method="POST" action="{{ url_for('add_to_cart') }}">
-          <input type="hidden" name="product_id" value="{{ product._id }}" />
-          <button type="submit" class="btn btn-primary w-100">
-            Add to cart
-          </button>
-        </form>
-      </div>
-    </a>
+        <h5 class="mt-2 text-capitalize text-primary display-6">
+          {{ product.product_name }}
+        </h5>
+        <p>{{ product.price |format_idr }}</p>
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-primary w-100"
+        onclick="addToCart('{{ product._id }}')"
+      >
+        Add to cart
+      </button>
+    </div>
     {% endif %} {% endfor %}
   </div>
 
@@ -117,34 +126,38 @@
   <div
     class="d-flex justify-content-between align-items-center mb-4 mt-5 pt-0 pt-md-5"
   >
-    <h1 class="display-6 mb-0 text-primary">Pasta</h1>
+    <h2 class="mb-0 text-primary">Pasta</h2>
     <div class="d-none d-md-flex">
       <i class="bx bx-md bxs-chevron-left text-primary left-arrow"></i>
       <i class="bx bx-md bxs-chevron-right text-primary right-arrow"></i>
     </div>
   </div>
+
   <div class="scrollable-container">
     {% for product in products %} {% if product.category == "pasta" %}
-    <a
-      href="{{ url_for('detail_product', id=product._id) }}"
-      class="pointer-event text-decoration-none"
-    >
-      <div class="product-card">
+    <div class="product-card">
+      <a
+        href="{{ url_for('detail_product', id=product._id) }}"
+        class="pointer-event text-decoration-none"
+      >
         <img
           src="{{ url_for('static', filename='images/' ~ product.image) }}"
           alt="{{ product.product_name }}"
-          class="product-image"
+          class="object-fit-cover"
         />
-        <h5 class="mt-2 fw-bold text-capitalize">{{ product.product_name }}</h5>
-        <p>{{ product.price }}</p>
-        <form method="POST" action="{{ url_for('add_to_cart') }}">
-          <input type="hidden" name="product_id" value="{{ product._id }}" />
-          <button type="submit" class="btn btn-primary w-100">
-            Add to cart
-          </button>
-        </form>
-      </div>
-    </a>
+        <h5 class="mt-2 text-capitalize text-primary display-6">
+          {{ product.product_name }}
+        </h5>
+        <p>{{ product.price |format_idr }}</p>
+      </a>
+      <button
+        type="button"
+        class="btn btn-primary w-100"
+        onclick="addToCart('{{ product._id }}')"
+      >
+        Add to cart
+      </button>
+    </div>
     {% endif %} {% endfor %}
   </div>
 
@@ -164,6 +177,27 @@
         container.scrollBy({ left: 300, behavior: "smooth" });
       });
     });
+
+    function addToCart(productId) {
+      $.ajax({
+        type: "POST",
+        url: "/add_to_cart",
+        data: { product_id: productId },
+        success: function (response) {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: response.msg,
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "btn btn-primary",
+            },
+          }).then(() => {
+            window.location.href = "/cart/{{username}}";
+          });
+        },
+      });
+    }
   </script>
   {% endblock %}
 </div>

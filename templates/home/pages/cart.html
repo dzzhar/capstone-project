@@ -11,8 +11,7 @@
       <div class="nav nav-tabs mb-5" id="nav-tab" role="tablist">
         <a
           class="nav-link active text-primary"
-          id="nav-home-tab"
-          href="{{ url_for('cart', username=user_info['username']) }}"
+          id="nav-cart-tab"
           type="button"
           role="tab"
           aria-controls="nav-home"
@@ -22,7 +21,7 @@
         </a>
         <a
           class="nav-link text-muted"
-          id="nav-home-tab"
+          id="nav-order-tab"
           href="{{ url_for('order', username=user_info['username']) }}"
           type="button"
           role="tab"
@@ -64,19 +63,19 @@
 
           <!-- Quantity dan Tombol Hapus -->
           <div class="d-flex gap-1 justify-content-between">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" id="item-{{item.id}}">
               <span class="text-muted me-2 d-none d-md-block">Quantity</span>
               <div class="d-flex align-items-center border-number">
                 <button
                   class="minus-btn"
-                  onclick="updateQuantity('minus', {{ item.id }})"
+                  onclick="updateQuantity('minus', '{{ item.id }}')"
                 >
                   -
                 </button>
                 <p class="jumlah-item">{{ item.quantity }}</p>
                 <button
                   class="plus-btn"
-                  onclick="updateQuantity('plus', {{ item.id }})"
+                  onclick="updateQuantity('plus', '{{ item.id }}')"
                 >
                   +
                 </button>
@@ -84,7 +83,7 @@
             </div>
             <button
               class="btn btn-danger btn-sm ms-auto hapus-item"
-              onclick="removeItem({{ item.id }})"
+              onclick="removeItemFromCart('{{ item.id }}')"
             >
               <i class="bx bx-trash"></i>
             </button>
@@ -103,10 +102,17 @@
             <label for="customerName" class="form-label text-primary"
               >Fullname</label
             >
-            <input type="text" class="form-control" id="customerName" required />
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              required
+            />
           </div>
           <div class="mb-3">
-            <label for="customerAddress" class="form-label text-primary">Address</label>
+            <label for="customerAddress" class="form-label text-primary"
+              >Address</label
+            >
             <textarea
               class="form-control"
               id="customerAddress"
@@ -144,57 +150,49 @@
   </div>
 
   <script>
+    // buat pesanan
     function placeOrder() {
-    // Ambil data dari form
-    const customerName = document.getElementById('customerName').value.trim();
-    const customerAddress = document.getElementById('customerAddress').value.trim();
+      // Ambil data dari form
+      const customerName = document.getElementById("customerName").value.trim();
+      const customerAddress = document
+        .getElementById("customerAddress")
+        .value.trim();
 
-    if (!customerName || !customerAddress) {
-        alert('Nama dan alamat harus diisi!');
-        return;
-    }
+      // Siapkan data pesanan
+      const orderData = {
+        name: customerName,
+        address: customerAddress,
+        products: [],
+        total_price: parseInt(
+          document
+            .getElementById("total")
+            .innerText.replace("Rp. ", "")
+            .replace(".", "")
+        ),
+      };
 
-    // Siapkan data pesanan
-    const orderData = {
-        name: customerName, // Nama pelanggan
-        address: customerAddress, // Alamat pelanggan
-        products: [], // Array produk
-        total_price: parseInt(document.getElementById('total').innerText.replace('Rp. ', '').replace('.', '')) // Harga total
-    };
-
-    // Iterasi melalui setiap item di keranjang
-    document.querySelectorAll('.cart-item').forEach(function(item) {
+      // Iterasi melalui setiap item di keranjang
+      document.querySelectorAll(".cart-item").forEach(function (item) {
         const product = {
-            name: item.querySelector('.text-primary').innerText.trim(), // Nama produk
-            quantity: parseInt(item.querySelector('.jumlah-item').innerText.trim()), // Jumlah
-            price: parseInt(item.getAttribute('data-harga')) // Harga per item
+          name: item.querySelector(".text-primary").innerText.trim(),
+          quantity: parseInt(
+            item.querySelector(".jumlah-item").innerText.trim()
+          ),
+          price: parseInt(item.getAttribute("data-harga")),
         };
         orderData.products.push(product);
-    });
+      });
 
-    // Kirim data pesanan ke backend menggunakan AJAX
-    $.ajax({
-        type: 'POST',
-        url: '/place_order',
+      $.ajax({
+        type: "POST",
+        url: "/place_order",
         data: JSON.stringify(orderData),
-        contentType: 'application/json',
-        success: function(response) {
-            console.log('Pesanan berhasil ditambahkan');
-            // Opsional: Redirect ke halaman tertentu setelah berhasil
-            alert('Pesanan berhasil dibuat!');
-            window.location.reload(); // Kembali ke halaman keranjang
+        contentType: "application/json",
+        success: function (response) {
+          window.location.reload();
         },
-        error: function(error) {
-            console.error('Error saat memesan', error);
-            alert('Gagal membuat pesanan, coba lagi nanti.');
-        }
-    });
-}
-
-// Tambahkan event listener ke tombol "Pesan Sekarang"
-document.getElementById('placeOrder').addEventListener('click', placeOrder);
-
-
+      });
+    }
   </script>
   {% endblock %}
 </div>
