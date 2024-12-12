@@ -103,18 +103,38 @@
             <label for="customerName" class="form-label text-primary"
               >Fullname</label
             >
-            <input type="text" class="form-control" id="customerName" required />
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              required
+            />
+            <div
+              class="text-danger d-flex align-items-center mt-1 small d-none"
+              id="customerNameAlert"
+            >
+              <i class="bx bxs-error-circle me-2"></i>
+              Fullname cannot be empty!
+            </div>
           </div>
           <div class="mb-3">
-            <label for="customerAddress" class="form-label text-primary">Address</label>
+            <label for="customerAddress" class="form-label text-primary"
+              >Address</label
+            >
             <textarea
               class="form-control"
               id="customerAddress"
               style="height: 80px; resize: none"
               required
             ></textarea>
+            <div
+              class="text-danger d-flex align-items-center mt-1 small d-none"
+              id="customerAddressAlert"
+            >
+              <i class="bx bxs-error-circle me-2"></i>
+              Address cannot be empty!
+            </div>
           </div>
-
           <div class="d-flex justify-content-between mb-3 mt-4">
             <span class="fw-bold text-primary">Grand Total:</span>
             <span class="fw-bold text-primary" id="total">Rp. 0</span>
@@ -144,56 +164,124 @@
   </div>
 
   <script>
+    $(document).ready(function () {
+      $("#customerName").on("input", function () {
+        if ($(this).val()) {
+          $("#customerNameAlert").addClass("d-none");
+        }
+      });
+
+      $("#customerAddress").on("input", function () {
+        if ($(this).val()) {
+          $("#customerAddressAlert").addClass("d-none");
+        }
+      });
+    });
+
     function placeOrder() {
-    // Ambil data dari form
-    const customerName = document.getElementById('customerName').value.trim();
-    const customerAddress = document.getElementById('customerAddress').value.trim();
+      // Ambil data dari form
+      const customerName = document.getElementById("customerName").value.trim();
+      const customerAddress = document
+        .getElementById("customerAddress")
+        .value.trim();
 
-    if (!customerName || !customerAddress) {
-        alert('Nama dan alamat harus diisi!');
-        return;
-    }
-
-    // Siapkan data pesanan
-    const orderData = {
+      // Siapkan data pesanan
+      const orderData = {
         name: customerName, // Nama pelanggan
         address: customerAddress, // Alamat pelanggan
         products: [], // Array produk
-        total_price: parseInt(document.getElementById('total').innerText.replace('Rp. ', '').replace('.', '')) // Harga total
-    };
+        total_price: parseInt(
+          document
+            .getElementById("total")
+            .innerText.replace("Rp. ", "")
+            .replace(".", "")
+        ), // Harga total
+      };
 
-    // Iterasi melalui setiap item di keranjang
-    document.querySelectorAll('.cart-item').forEach(function(item) {
+      // Iterasi melalui setiap item di keranjang
+      document.querySelectorAll(".cart-item").forEach(function (item) {
         const product = {
-            name: item.querySelector('.text-primary').innerText.trim(), // Nama produk
-            quantity: parseInt(item.querySelector('.jumlah-item').innerText.trim()), // Jumlah
-            price: parseInt(item.getAttribute('data-harga')) // Harga per item
+          name: item.querySelector(".text-primary").innerText.trim(), // Nama produk
+          quantity: parseInt(
+            item.querySelector(".jumlah-item").innerText.trim()
+          ), // Jumlah
+          price: parseInt(item.getAttribute("data-harga")), // Harga per item
         };
         orderData.products.push(product);
-    });
+      });
 
-    // Kirim data pesanan ke backend menggunakan AJAX
-    $.ajax({
-        type: 'POST',
-        url: '/place_order',
+      // Kirim data pesanan ke backend menggunakan AJAX
+      $.ajax({
+        type: "POST",
+        url: "/place_order",
         data: JSON.stringify(orderData),
-        contentType: 'application/json',
-        success: function(response) {
-            console.log('Pesanan berhasil ditambahkan');
-            // Opsional: Redirect ke halaman tertentu setelah berhasil
-            alert('Pesanan berhasil dibuat!');
-            window.location.reload(); // Kembali ke halaman keranjang
+        contentType: "application/json",
+        success: function (response) {
+          window.location.reload(); // Kembali ke halaman keranjang
         },
-        error: function(error) {
-            console.error('Error saat memesan', error);
-            alert('Gagal membuat pesanan, coba lagi nanti.');
-        }
-    });
+      });
+    }
+
+    // Tambahkan event listener ke tombol "Pesan Sekarang"
+    document.getElementById("placeOrder").addEventListener("click", placeOrder);
+
+    function updateQuantity(action, itemId) {
+  const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+  const quantityElement = itemElement.querySelector('.jumlah-item');
+  let currentQuantity = parseInt(quantityElement.innerText);
+
+  if (action === 'plus') {
+    currentQuantity += 1; // Tambah jumlah
+  } else if (action === 'minus' && currentQuantity > 1) {
+    currentQuantity -= 1; // Kurangi jumlah
+  }
+
+  quantityElement.innerText = currentQuantity;
+
+  $.ajax({
+    type: 'POST',
+    url: '/update_quantity',
+    data: JSON.stringify({ itemId: itemId, quantity: currentQuantity }),
+    contentType: 'application/json',
+    success: function (response) {
+      updateTotal();
+    },
+    error: function (error) {
+      console.error('Error updating quantity:', error);
+    },
+  });
 }
 
-// Tambahkan event listener ke tombol "Pesan Sekarang"
-document.getElementById('placeOrder').addEventListener('click', placeOrder);
+function removeItem(itemId) {
+  // Hapus elemen item dari DOM
+  const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+  itemElement.remove();
 
+  // Kirim data ke server untuk menghapus item dari keranjang
+  $.ajax({
+    type: 'POST',
+    url: '/remove_item',
+    data: JSON.stringify({ itemId: itemId }),
+    contentType: 'application/json',
+    success: function (response) {
+      // Update total harga jika perlu
+      updateTotal();
+    },
+    error: function (error) {
+      console.error('Error removing item:', error);
+    },
+  });
+}
+
+function updateTotal() {
+  let total = 0;
+  document.querySelectorAll('.cart-item').forEach(function (item) {
+    const quantity = parseInt(item.querySelector('.jumlah-item').innerText);
+    const price = parseInt(item.getAttribute('data-harga'));
+    total += quantity * price;
+  });
+  document.getElementById('total').innerText = `Rp. ${total.toLocaleString()}`;
+}
 
   </script>
   {% endblock %}

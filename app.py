@@ -183,6 +183,19 @@ def products():
         products=products,
     )
 
+@app.route('/update_quantity', methods=['POST'])
+def update_quantity():
+    data = request.get_json()
+    # Update quantity in database
+    return jsonify({'success': True})
+
+@app.route('/remove_item', methods=['POST'])
+def remove_item():
+    data = request.get_json()
+    # Remove item from database
+    return jsonify({'success': True})
+
+
 
 # Rute untuk halaman produk
 @app.route("/product/<id>")
@@ -306,9 +319,9 @@ def cart(username):
         return redirect(url_for("login"))
 
 
-# endpoint place order
 @app.route("/place_order", methods=["POST"])
 def place_order():
+    # Ambil data dari request
     data = request.get_json()
 
     # Validasi data
@@ -320,31 +333,46 @@ def place_order():
             400,
         )
 
+    # Ambil token dari cookie
+    token_receive = request.cookies.get("mytoken")
+    if not token_receive:
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+
     try:
+        # Decode token untuk mengambil username
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+        username = payload["id"]  # Ambil ID (username) dari payload token
+
         # Buat data pesanan
         order = {
+            "username": username,
             "customer_name": data["name"],
             "customer_address": data["address"],
             "products": data["products"],
             "total_price": sum(
                 item["price"] * item["quantity"] for item in data["products"]
             ),
-            "status": "pending",  # Status default
+            "status": "pending",  # Status default pesanan
             "created_at": datetime.utcnow(),
         }
 
-        # Simpan ke database
+        # Simpan pesanan ke database
         db.orders.insert_one(order)
 
         return (
-            jsonify({"status": "success", "message": "Order created successfully"}),
+            jsonify({"status": "success", "message": "Order created successfully"}), 
             201,
         )
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"status": "error", "message": "Session expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"status": "error", "message": "Invalid token"}), 401
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# endpoint get order by username
+
 @app.route("/order/<username>")
 def order(username):
     token_receive = request.cookies.get("mytoken")
@@ -355,11 +383,16 @@ def order(username):
         if username != payload["id"]:
             return redirect(url_for("login"))
 
+        # Ambil informasi pengguna
         user_info = db.users.find_one({"username": username})
-        orders = db.orders.find_one({"username": username})
+        if not user_info:
+            return jsonify({"status": "error", "message": "User not found"}), 404
+
+        # Ambil semua pesanan pengguna
+        orders = list(db.orders.find({"username": username}))
 
         if not orders:
-            print(f"No order found for {username}")  # Debugging log
+            print(f"No orders found for {username}")  # Debugging log
 
         return render_template(
             "home/pages/orders.html",
@@ -368,8 +401,11 @@ def order(username):
             orders=orders,
         )
 
-    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+    except jwt.ExpiredSignatureError:
         return redirect(url_for("login"))
+    except jwt.DecodeError:
+        return redirect(url_for("login"))
+
 
 
 """ ------ DASHBOARD ADMIN SECTION ------ """
