@@ -37,6 +37,7 @@
     <!-- Bagian Item Keranjang -->
     <div class="col-lg-8 mb-4" id="cartItems">
       {% for item in cart_items %}
+      
       <div
         class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center"
         data-harga="{{ item.price }}"
@@ -76,6 +77,7 @@
                 <button
                   class="plus-btn"
                   onclick="updateQuantity('plus', '{{ item.id }}')"
+                  
                 >
                   +
                 </button>
@@ -193,6 +195,49 @@
         },
       });
     }
+
+    function updateQuantity(action, itemId) {
+      // Get the current quantity
+      let quantityElement = document.querySelector(
+        `#item-${itemId} .jumlah-item`
+      );
+
+      let currentQuantity = parseInt(quantityElement.innerText);
+
+      // Adjust the quantity based on the action
+      if (action === "minus" && currentQuantity > 1) {
+        currentQuantity--;
+      } else if (action === "plus") {
+        currentQuantity++;
+      }
+
+      // Send the updated quantity to the server via AJAX
+      $.ajax({
+        type: "POST",
+        url: "/update_quantity",
+        data: JSON.stringify({ item_id: itemId, quantity: currentQuantity }),
+        contentType: "application/json",
+        success: function (response) {
+          if (response.status === "success") {
+            quantityElement.innerText = currentQuantity;
+          }
+        },
+      });
+    }
+
+// Fungsi untuk menghapus item dari cart di server
+function removeItemFromCart(itemId) {
+  $.ajax({
+    type: "POST",
+    url: "/remove_from_cart",
+    data: JSON.stringify({ product_id: itemId }),
+    contentType: "application/json",
+    success: function (response) {
+      console.log("Item removed successfully:", response);
+    },
+  });
+}
+
   </script>
   {% endblock %}
 </div>
