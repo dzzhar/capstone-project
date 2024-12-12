@@ -109,6 +109,13 @@
               id="customerName"
               required
             />
+            <div
+              class="text-danger d-flex align-items-center mt-1 small d-none"
+              id="customerNameAlert"
+            >
+              <i class="bx bxs-error-circle me-2"></i>
+              Fullname cannot be empty!
+            </div>
           </div>
           <div class="mb-3">
             <label for="customerAddress" class="form-label text-primary"
@@ -120,7 +127,13 @@
               style="height: 80px; resize: none"
               required
             ></textarea>
-          </div>
+            <div
+              class="text-danger d-flex align-items-center mt-1 small d-none"
+              id="customerAddressAlert"
+            >
+              <i class="bx bxs-error-circle me-2"></i>
+              Address cannot be empty!
+            </div>
 
           <div class="d-flex justify-content-between mb-3 mt-4">
             <span class="fw-bold text-primary">Grand Total:</span>
@@ -151,6 +164,20 @@
   </div>
 
   <script>
+    $(document).ready(function () {
+      $("#customerName").on("input", function () {
+        if ($(this).val()) {
+          $("#customerNameAlert").addClass("d-none");
+        }
+      });
+
+      $("#customerAddress").on("input", function () {
+        if ($(this).val()) {
+          $("#customerAddressAlert").addClass("d-none");
+        }
+      });
+    });
+
     // buat pesanan
     function placeOrder() {
       // Ambil data dari form
