@@ -11,8 +11,7 @@
       <div class="nav nav-tabs mb-5" id="nav-tab" role="tablist">
         <a
           class="nav-link active text-primary"
-          id="nav-home-tab"
-          href="{{ url_for('cart', username=user_info['username']) }}"
+          id="nav-cart-tab"
           type="button"
           role="tab"
           aria-controls="nav-home"
@@ -22,7 +21,7 @@
         </a>
         <a
           class="nav-link text-muted"
-          id="nav-home-tab"
+          id="nav-order-tab"
           href="{{ url_for('order', username=user_info['username']) }}"
           type="button"
           role="tab"
@@ -38,6 +37,7 @@
     <!-- Bagian Item Keranjang -->
     <div class="col-lg-8 mb-4" id="cartItems">
       {% for item in cart_items %}
+
       <div
         class="cart-item p-3 border rounded-3 mb-3 d-flex align-items-center"
         data-harga="{{ item.price }}"
@@ -64,19 +64,19 @@
 
           <!-- Quantity dan Tombol Hapus -->
           <div class="d-flex gap-1 justify-content-between">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" id="item-{{item.id}}">
               <span class="text-muted me-2 d-none d-md-block">Quantity</span>
               <div class="d-flex align-items-center border-number">
                 <button
                   class="minus-btn"
-                  onclick="updateQuantity('minus', {{ item.id }})"
+                  onclick="updateQuantity('minus', '{{ item.id }}')"
                 >
                   -
                 </button>
                 <p class="jumlah-item">{{ item.quantity }}</p>
                 <button
                   class="plus-btn"
-                  onclick="updateQuantity('plus', {{ item.id }})"
+                  onclick="updateQuantity('plus', '{{ item.id }}')"
                 >
                   +
                 </button>
@@ -84,7 +84,7 @@
             </div>
             <button
               class="btn btn-danger btn-sm ms-auto hapus-item"
-              onclick="removeItem({{ item.id }})"
+              onclick="removeItemFromCart('{{ item.id }}')"
             >
               <i class="bx bx-trash"></i>
             </button>
@@ -134,7 +134,7 @@
               <i class="bx bxs-error-circle me-2"></i>
               Address cannot be empty!
             </div>
-          </div>
+
           <div class="d-flex justify-content-between mb-3 mt-4">
             <span class="fw-bold text-primary">Grand Total:</span>
             <span class="fw-bold text-primary" id="total">Rp. 0</span>
@@ -178,6 +178,7 @@
       });
     });
 
+    // buat pesanan
     function placeOrder() {
       // Ambil data dari form
       const customerName = document.getElementById("customerName").value.trim();
@@ -187,102 +188,92 @@
 
       // Siapkan data pesanan
       const orderData = {
-        name: customerName, // Nama pelanggan
-        address: customerAddress, // Alamat pelanggan
-        products: [], // Array produk
+        name: customerName,
+        address: customerAddress,
+        products: [],
         total_price: parseInt(
           document
             .getElementById("total")
             .innerText.replace("Rp. ", "")
             .replace(".", "")
-        ), // Harga total
+        ),
       };
 
       // Iterasi melalui setiap item di keranjang
       document.querySelectorAll(".cart-item").forEach(function (item) {
         const product = {
-          name: item.querySelector(".text-primary").innerText.trim(), // Nama produk
+          name: item.querySelector(".text-primary").innerText.trim(),
           quantity: parseInt(
             item.querySelector(".jumlah-item").innerText.trim()
-          ), // Jumlah
-          price: parseInt(item.getAttribute("data-harga")), // Harga per item
+          ),
+          price: parseInt(item.getAttribute("data-harga")),
         };
         orderData.products.push(product);
       });
 
-      // Kirim data pesanan ke backend menggunakan AJAX
       $.ajax({
         type: "POST",
         url: "/place_order",
         data: JSON.stringify(orderData),
         contentType: "application/json",
         success: function (response) {
-          window.location.reload(); // Kembali ke halaman keranjang
+          window.location.reload();
         },
       });
     }
 
-    // Tambahkan event listener ke tombol "Pesan Sekarang"
-    document.getElementById("placeOrder").addEventListener("click", placeOrder);
-
     function updateQuantity(action, itemId) {
-  const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-  const quantityElement = itemElement.querySelector('.jumlah-item');
-  let currentQuantity = parseInt(quantityElement.innerText);
+      // Get the current quantity
+      let quantityElement = document.querySelector(
+        `#item-${itemId} .jumlah-item`
+      );
 
-  if (action === 'plus') {
-    currentQuantity += 1; // Tambah jumlah
-  } else if (action === 'minus' && currentQuantity > 1) {
-    currentQuantity -= 1; // Kurangi jumlah
-  }
+      let currentQuantity = parseInt(quantityElement.innerText);
 
-  quantityElement.innerText = currentQuantity;
+      // Adjust the quantity based on the action
+      if (action === "minus" && currentQuantity > 1) {
+        currentQuantity--;
+      } else if (action === "plus") {
+        currentQuantity++;
+      }
 
-  $.ajax({
-    type: 'POST',
-    url: '/update_quantity',
-    data: JSON.stringify({ itemId: itemId, quantity: currentQuantity }),
-    contentType: 'application/json',
-    success: function (response) {
-      updateTotal();
-    },
-    error: function (error) {
-      console.error('Error updating quantity:', error);
-    },
-  });
-}
+      // Send the updated quantity to the server via AJAX
+      $.ajax({
+        type: "POST",
+        url: "/update_quantity",
+        data: JSON.stringify({ item_id: itemId, quantity: currentQuantity }),
+        contentType: "application/json",
+        success: function (response) {
+          if (response.status === "success") {
+            quantityElement.innerText = currentQuantity;
+          }
+        },
+      });
+    }
 
-function removeItem(itemId) {
-  // Hapus elemen item dari DOM
-  const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-  itemElement.remove();
-
-  // Kirim data ke server untuk menghapus item dari keranjang
-  $.ajax({
-    type: 'POST',
-    url: '/remove_item',
-    data: JSON.stringify({ itemId: itemId }),
-    contentType: 'application/json',
-    success: function (response) {
-      // Update total harga jika perlu
-      updateTotal();
-    },
-    error: function (error) {
-      console.error('Error removing item:', error);
-    },
-  });
-}
-
-function updateTotal() {
-  let total = 0;
-  document.querySelectorAll('.cart-item').forEach(function (item) {
-    const quantity = parseInt(item.querySelector('.jumlah-item').innerText);
-    const price = parseInt(item.getAttribute('data-harga'));
-    total += quantity * price;
-  });
-  document.getElementById('total').innerText = `Rp. ${total.toLocaleString()}`;
-}
-
+    // Fungsi untuk menghapus item dari cart di server
+    function removeItemFromCart(itemId) {
+      $.ajax({
+        type: "POST",
+        url: "/remove_from_cart",
+        data: JSON.stringify({ product_id: itemId }),
+        contentType: "application/json",
+        success: function (response) {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: response.msg,
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "btn btn-primary",
+            },
+          }).then(() => {
+            window.location.reload();
+            window.location.href = `/cart/${username}`;
+          });
+        },
+      });
+    }
   </script>
   {% endblock %}
 </div>

@@ -181,6 +181,7 @@ def products():
         is_logged_in=is_logged_in,
         user_info=user_info,
         products=products,
+        username=user_info["username"] if user_info else None,
     )
 
 @app.route('/update_quantity', methods=['POST'])
@@ -273,7 +274,7 @@ def add_to_cart():
         db.carts.update_one({"username": username}, {"$set": {"items": items}})
 
     # Redirect ke halaman keranjang setelah sukses
-    return redirect(url_for("cart", username=username))
+    return jsonify({"result": "success", "msg": "Product added to cart."})
 
 
 # endpoint cart
@@ -298,6 +299,7 @@ def cart(username):
                     total_price += item_price
                     cart_items.append(
                         {
+                            "id": product["_id"],
                             "product_name": product["product_name"],
                             "price": product["price"],
                             "image": product["image"],
@@ -406,6 +408,79 @@ def order(username):
     except jwt.DecodeError:
         return redirect(url_for("login"))
 
+
+
+# endpoint update quantity
+@app.route("/update_quantity", methods=["POST"])
+def update_quantity():
+    try:
+        # Retrieve and decode the JWT token from the cookie
+        token_receive = request.cookies.get("mytoken")
+        if not token_receive:
+            return jsonify({"status": "error", "message": "Token missing"}), 401
+
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+        username = payload["id"]  # Retrieve username from JWT
+
+        data = request.get_json()
+        item_id = data["item_id"]
+        new_quantity = data["quantity"]
+
+        # Update the quantity in the database
+        db.carts.update_one(
+            {"username": username, "items.product_id": item_id},
+            {"$set": {"items.$.quantity": new_quantity}},
+        )
+
+        return (
+            jsonify({"status": "success", "message": "Quantity updated successfully"}),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+# endpoint remove item from cart
+@app.route("/remove_from_cart", methods=["POST"])
+def remove_from_cart():
+    try:
+        token_receive = request.cookies.get("mytoken")
+        if not token_receive:
+            return jsonify({"msg": "Authentication required"}), 401
+
+        # Decode token
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
+        username = payload["id"]
+
+        # Ambil data product_id dari request JSON
+        data = request.get_json()
+        product_id = data.get("product_id")
+
+        if not product_id:
+            return jsonify({"msg": "Product ID is required"}), 400
+
+        # Cari keranjang pengguna
+        cart = db.carts.find_one({"username": username})
+
+        if cart:
+            # Hapus item dari keranjang berdasarkan product_id
+            db.carts.update_one(
+                {"username": username}, {"$pull": {"items": {"product_id": product_id}}}
+            )
+            return (
+                jsonify({"result": "success", "msg": "Product removed from cart!"}),
+                200,
+            )
+        else:
+            return jsonify({"msg": "Cart not found"}), 404
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"msg": "Session expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"msg": "Invalid token"}), 401
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
 
 
 """ ------ DASHBOARD ADMIN SECTION ------ """

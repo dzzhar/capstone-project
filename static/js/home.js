@@ -70,24 +70,32 @@ document.querySelectorAll(".cart-item").forEach((item) => {
   });
 });
 
-document.querySelectorAll(".hapus-item").forEach((button) => {
-  button.addEventListener("click", function () {
-    const item = this.closest(".cart-item");
-    item.remove();
-    updateTotals();
-  });
-});
-
 // Hitung ulang total saat halaman dimuat
 document.addEventListener("DOMContentLoaded", updateTotals);
-
-
 
 document
   .getElementById("whatsappOrder")
   .addEventListener("click", function (e) {
     e.preventDefault();
 
+    // Ambil nilai dari input fullname dan address
+    const customerName = document.getElementById("customerName").value.trim();
+    const customerAddress = document
+      .getElementById("customerAddress")
+      .value.trim();
+
+    // validasi
+    if (!customerName || !customerAddress) {
+      if (!customerName) {
+        $("#customerNameAlert").removeClass("d-none");
+      }
+      if (!customerAddress) {
+        $("#customerAddressAlert").removeClass("d-none");
+      }
+      return;
+    }
+
+    // Ambil data dari keranjang
     const cartItems = document.querySelectorAll(".cart-item");
     let message = "Halo, saya ingin memesan:\n";
     let subtotal = 0;
@@ -105,11 +113,16 @@ document
 
     const total = subtotal;
 
-    message += `\nTotal: ${formatCurrency(total)}\n\nMohon konfirmasi.`;
+    message += `\nTotal: ${formatCurrency(
+      total
+    )}\n\nNama: ${customerName}\nAlamat: ${customerAddress}\n\nMohon konfirmasi.`;
 
+    // Nomor WhatsApp tujuan
     const phoneNumber = "628997626200";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
+
+    // Buka WhatsApp
     window.open(whatsappUrl, "_blank");
   });

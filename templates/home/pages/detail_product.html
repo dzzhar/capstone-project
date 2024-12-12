@@ -31,15 +31,43 @@
           >
             Continue Shipping
           </button>
-          <form method="POST" action="{{ url_for('add_to_cart') }}">
-            <input type="hidden" name="product_id" value="{{ product._id }}" />
-            <button type="submit" class="btn btn-primary w-100">
+          <div>
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+              onclick="addToCart('{{product._id}}')"
+            >
               Add to cart
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  let username = "{{ user_info['username'] }}";
+
+  function addToCart(productId) {
+    $.ajax({
+      type: "POST",
+      url: "/add_to_cart",
+      data: { product_id: productId },
+      success: function (response) {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: response.msg,
+          confirmButtonText: "OK",
+          customClass: {
+            confirmButton: "btn btn-primary",
+          },
+        }).then(() => {
+          window.location.href = `/cart/${username}`;
+        });
+      },
+    });
+  }
+</script>
 {% endblock %}
