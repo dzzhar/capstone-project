@@ -184,19 +184,6 @@ def products():
         username=user_info["username"] if user_info else None,
     )
 
-@app.route('/update_quantity', methods=['POST'])
-def update_quantity():
-    data = request.get_json()
-    # Update quantity in database
-    return jsonify({'success': True})
-
-@app.route('/remove_item', methods=['POST'])
-def remove_item():
-    data = request.get_json()
-    # Remove item from database
-    return jsonify({'success': True})
-
-
 
 # Rute untuk halaman produk
 @app.route("/product/<id>")
@@ -362,7 +349,7 @@ def place_order():
         db.orders.insert_one(order)
 
         return (
-            jsonify({"status": "success", "message": "Order created successfully"}), 
+            jsonify({"status": "success", "message": "Order created successfully"}),
             201,
         )
 
@@ -372,7 +359,6 @@ def place_order():
         return jsonify({"status": "error", "message": "Invalid token"}), 401
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-
 
 
 @app.route("/order/<username>")
@@ -409,7 +395,6 @@ def order(username):
         return redirect(url_for("login"))
 
 
-
 # endpoint update quantity
 @app.route("/update_quantity", methods=["POST"])
 def update_quantity():
@@ -439,6 +424,7 @@ def update_quantity():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
 
 # endpoint remove item from cart
 @app.route("/remove_from_cart", methods=["POST"])
