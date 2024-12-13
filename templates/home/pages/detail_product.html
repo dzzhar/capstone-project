@@ -55,17 +55,39 @@
       url: "/add_to_cart",
       data: { product_id: productId },
       success: function (response) {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: response.msg,
-          confirmButtonText: "OK",
-          customClass: {
-            confirmButton: "btn btn-primary",
-          },
-        }).then(() => {
-          window.location.href = `/cart/${username}`;
-        });
+        if (response.result === "success") {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: response.msg,
+            cancelButtonText: "Continue Shipping",
+            confirmButtonText: "OK",
+            showCancelButton: true,
+            customClass: {
+              cancelButton: "btn btn-outline-secondary",
+              confirmButton: "btn btn-primary",
+            },
+            buttonsStyling: false,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = `/cart/${username}`;
+            } else if (result.isDismissed) {
+              window.location.href = "/products";
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Login Required",
+            text: response.msg,
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "btn btn-primary",
+            },
+          }).then((result) => {
+            window.location.href = "/login";
+          });
+        }
       },
     });
   }

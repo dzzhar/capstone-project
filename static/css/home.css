@@ -290,14 +290,14 @@ footer img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px;
+  padding: 15px;
   border: 1px solid var(--bs-primary);
   border-radius: 2.5rem;
   background-color: #f9fafb;
   text-align: center;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   flex: 0 0 auto;
-  width: 340px;
+  width: 320px;
   overflow: hidden;
 }
 
@@ -328,7 +328,7 @@ footer img {
 .product-card .btn {
   font-size: 1rem;
   font-weight: bold;
-  padding: 10px 10px;
+  padding: 7px 7px;
   border-radius: 2rem;
 }
 
@@ -342,6 +342,40 @@ footer img {
   overflow-x: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@media (max-width: 576px) {
+  .product-card {
+    padding: 13px;
+    width: 280px;
+  }
+
+  .product-card img {
+    height: 200px;
+  }
+
+  .product-card h5 {
+    font-size: 1.1rem;
+  }
+
+  .product-card p {
+    font-size: 1rem;
+  }
+}
+
+/* Custom styles for SweetAlert2 buttons */
+.swal2-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between; /* Distribute buttons */
+}
+
+.swal2-confirm {
+  order: 2; /* Move the "OK" button to the right */
+}
+
+.swal2-cancel {
+  order: 1; /* Move the "Continue Shipping" button to the left */
 }
 
 /* Contact */
@@ -442,5 +476,30 @@ footer img {
 @media (min-width: 768px) {
   .product-wrapper {
     margin-top: 11rem;
+  }
+}
+
+/* Orders */
+.meta-info {
+  flex-basis: 50%;
+}
+
+.card-product {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .meta-info {
+    flex-basis: 100%;
+  }
+
+  .card-product {
+    flex-basis: 50%;
+    margin-block: 1rem;
+  }
+
+  .badge {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem;
   }
 }

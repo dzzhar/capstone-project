@@ -6,7 +6,7 @@
 <!-- content -->
 {% block content %}
 <div class="container">
-  <div class="row gx-4 cart">
+  <div class="row gx-0 gx-md-4 cart">
     <nav>
       <div class="nav nav-tabs mb-5" id="nav-tab" role="tablist">
         <a
@@ -22,11 +22,10 @@
         </a>
         <a
           class="nav-link active text-primary"
-          id="nav-orders-tab"
-          href="{{ url_for('order', username=user_info['username']) }}"
+          id="nav-home-tab"
           type="button"
           role="tab"
-          aria-controls="nav-orders"
+          aria-controls="nav-home"
           aria-selected="true"
         >
           <h2>My Orders</h2>
@@ -35,7 +34,8 @@
     </nav>
 
     {% if orders %}
-    <div class="row gx-4 d-flex flex-lg-row-reverse">
+    <!-- contact whatsapp -->
+    <div class="row gx-0 gx-md-4 d-flex flex-lg-row-reverse">
       <div class="col-lg-4 col-md-12 mb-4">
         <div class="p-3 border rounded-3">
           <h5 class="text-primary mb-4 fw-bold">Send us a message</h5>
@@ -43,6 +43,7 @@
             If you cannot find the answer, please explain your problem.
             Solutions will be provided promptly.
           </p>
+
           <a
             href="https://wa.me/6285183338861"
             class="btn btn-success w-100 rounded-pill"
@@ -54,66 +55,87 @@
       </div>
 
       <div class="col-lg-8 mb-4">
-        <div class="p-3 border rounded-3 text-primary">
-          <!-- Order Details -->
-          <div class="d-flex gap-5 border-bottom mb-4">
-            <div>
-              <p class="mb-0 text-muted">Order on</p>
-              <h6 class="fw-bold">{{ order.created_at }}</h6>
-            </div>
-            <div>
-              <p class="mb-0 text-muted">Total</p>
-              <h6 class="fw-bold">{{ order.total_price | format_idr }}</h6>
-            </div>
-            <div>
-              <p class="mb-0 text-muted">Ship to</p>
-              <h6 class="fw-bold">{{ order.customer_name }}</h6>
-            </div>
-          </div>
-
-          <!-- Products in Order -->
-          {% for product in order.products %}
-          <div class="cart-item mb-3 d-flex align-items-center pt-4">
-            <img
-              src="{{ url_for('static', filename='images/' ~ product.image) }}"
-              alt="Product Image"
-              class="img-fluid rounded me-3 object-fit-cover"
-              style="width: 100px; height: 100px"
-            />
-            <div class="d-flex flex-column">
-              <h5 class="text-primary fw-bold text-capitalize mb-2">
-                {{ product.name }}
-              </h5>
-              <div class="d-flex align-items-center mb-2">
-                <h6 class="text-primary fw-bold mb-0">
-                  {{ product.price | format_idr }}
-                  <span class="ms-3 fw-normal text-muted">Quantity {{ product.quantity }}</span>
+        {% for order in orders %}
+        <div class="p-3 border rounded-3 text-primary mb-4">
+          <div
+            class="d-flex border-bottom pb-3 mb-md-0 justify-content-md-between align-items-top align-items-md-center"
+          >
+            <div
+              class="d-flex flex-column gap-2 gap-md-5 flex-md-row meta-info"
+            >
+              <div>
+                <p class="mb-0 text-muted">Order on</p>
+                <h6 class="fw-bold mb-0">
+                  {{ order.created_at.strftime("%A, %d %B %Y") }}
+                </h6>
+              </div>
+              <div>
+                <p class="mb-0 text-muted">Total</p>
+                <h6 class="fw-bold mb-0">
+                  {{ order.total_price | format_idr }}
+                </h6>
+              </div>
+              <div class="d-none d-md-block">
+                <p class="mb-0 text-muted">Ship to</p>
+                <h6 class="fw-bold mb-0 text-capitalize">
+                  {{ order.customer_name }}
                 </h6>
               </div>
             </div>
+            <div class="d-flex flex-column justify-content-between">
+              <div class="d-md-none meta-info">
+                <p class="mb-0 text-muted">Ship to</p>
+                <h6 class="fw-bold mb-0 text-capitalize">
+                  {{ order.customer_name }}
+                </h6>
+              </div>
+              <h3
+                class="badge w-auto align-self-start text-capitalize mb-0 {% if order.status == 'pending' %} text-bg-warning {% elif order.status == 'on process' %}text-bg-primary{% elif order.status == 'done' %} text-bg-success {% endif %}"
+              >
+                {{ order.status }}
+              </h3>
+            </div>
           </div>
-          {% endfor %}
 
-          <!-- Order Status Badge -->
-          <span
-            class="badge w-auto align-self-start text-wrap mt-2 text-capitalize 
-            {% if order.status == 'pending' %} text-bg-warning 
-            {% elif order.status == 'on process' %} text-bg-primary 
-            {% elif order.status == 'done' %} text-bg-success 
-            {% endif %}">
-            {{ order.status }}
-          </span>
+          <div
+            class="cart-item mb-3 d-flex align-items-center pt-4 gap-4 gap-md-0 flex-wrap"
+          >
+            {% for product in order.products %}
+            <div class="d-flex align-items-center card-product">
+              <img
+                src="{{ url_for('static', filename='images/' ~ product.image) }}"
+                alt="Gambar Produk"
+                class="img-fluid rounded me-3 object-fit-cover"
+                style="width: 100px; height: 100px"
+              />
+
+              <div class="d-flex flex-column flex-wrap">
+                <!-- Nama Produk -->
+                <h5 class="text-primary fw-bold text-capitalize mb-2">
+                  {{ product.name }}
+                </h5>
+
+                <!-- Harga dan Quantity -->
+                <h6 class="text-primary fw-bold mb-0">
+                  {{ product.price | format_idr}}
+                </h6>
+                <span class="fw-normal text-muted mt-1"
+                  >Quantity {{ product.quantity }}</span
+                >
+              </div>
+            </div>
+            {% endfor %}
+          </div>
         </div>
+        {% endfor %} {% else %}
+        <div class="text-center">
+          <p class="text-muted">You haven't ordered anything.</p>
+          <a href="{{ url_for('products') }}" class="btn btn-primary">
+            Start Shopping
+          </a>
+        </div>
+        {% endif %} {% endblock %}
       </div>
     </div>
-    {% endfor %}
-    {% else %}
-    <!-- No Orders Message -->
-    <div class="text-center">
-      <p class="text-muted">You haven't ordered anything.</p>
-      <a href="{{ url_for('products') }}" class="btn btn-primary">Start Shopping</a>
-    </div>
-    {% endif %}
   </div>
 </div>
-{% endblock %}

@@ -134,6 +134,7 @@
               <i class="bx bxs-error-circle me-2"></i>
               Address cannot be empty!
             </div>
+          </div>
 
           <div class="d-flex justify-content-between mb-3 mt-4">
             <span class="fw-bold text-primary">Grand Total:</span>
@@ -156,9 +157,9 @@
     {% else %}
     <div class="text-center">
       <p class="text-muted">Your cart is empty.</p>
-      <a href="{{ url_for('products') }}" class="btn btn-primary">
-        Start Shopping
-      </a>
+      <a href="{{ url_for('products') }}" class="btn btn-primary"
+        >Start Shopping</a
+      >
     </div>
     {% endif %}
   </div>
@@ -180,13 +181,11 @@
 
     // buat pesanan
     function placeOrder() {
-      // Ambil data dari form
       const customerName = document.getElementById("customerName").value.trim();
       const customerAddress = document
         .getElementById("customerAddress")
         .value.trim();
 
-      // Siapkan data pesanan
       const orderData = {
         name: customerName,
         address: customerAddress,
@@ -199,14 +198,20 @@
         ),
       };
 
-      // Iterasi melalui setiap item di keranjang
       document.querySelectorAll(".cart-item").forEach(function (item) {
+        const image = item.querySelector("img")
+          ? item.querySelector("img").src
+          : "";
+
+        const imageName = image ? image.split("/").pop() : "";
+
         const product = {
           name: item.querySelector(".text-primary").innerText.trim(),
           quantity: parseInt(
             item.querySelector(".jumlah-item").innerText.trim()
           ),
           price: parseInt(item.getAttribute("data-harga")),
+          image: imageName,
         };
         orderData.products.push(product);
       });
@@ -218,26 +223,23 @@
         contentType: "application/json",
         success: function (response) {
           window.location.reload();
+          window.location.href = `/order/{{ user_info['username'] }}`;
         },
       });
     }
 
     function updateQuantity(action, itemId) {
-      // Get the current quantity
       let quantityElement = document.querySelector(
         `#item-${itemId} .jumlah-item`
       );
-
       let currentQuantity = parseInt(quantityElement.innerText);
 
-      // Adjust the quantity based on the action
       if (action === "minus" && currentQuantity > 1) {
         currentQuantity--;
       } else if (action === "plus") {
         currentQuantity++;
       }
 
-      // Send the updated quantity to the server via AJAX
       $.ajax({
         type: "POST",
         url: "/update_quantity",
@@ -251,7 +253,6 @@
       });
     }
 
-    // Fungsi untuk menghapus item dari cart di server
     function removeItemFromCart(itemId) {
       $.ajax({
         type: "POST",
@@ -269,7 +270,7 @@
             },
           }).then(() => {
             window.location.reload();
-            window.location.href = `/cart/${username}`;
+            window.location.href = `/cart/{{ user_info['username'] }}`;
           });
         },
       });

@@ -43,7 +43,7 @@ def allowed_file(filename):
 def format_idr(value):
     # Ensure value is treated as a number (float or int)
     value = float(value)
-    return f"Rp. {value:,.0f}"
+    return f"Rp. {value:,.0f}".replace(",", ".")
 
 
 app.jinja_env.filters["format_idr"] = format_idr
@@ -220,15 +220,18 @@ def detail_product(id):
 def add_to_cart():
     token_receive = request.cookies.get("mytoken")
     if not token_receive:
-        return redirect(url_for("login"))  # Redirect jika token tidak ada
+        return jsonify(
+            {"result": "failure", "msg": "You must be logged in to continue."}
+        )
 
     try:
         # Decode JWT untuk mendapatkan informasi pengguna
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=["HS256"])
         username = payload["id"]
     except (jwt.ExpiredSignatureError, jwt.DecodeError):
-        return redirect(url_for("login"))  # Redirect jika token invalid
-
+        return jsonify(
+            {"result": "failure", "msg": "You must be logged in to continue."}
+        )
     # Ambil `product_id` dari form
     product_id = request.form.get("product_id")
     if not product_id:
@@ -348,6 +351,9 @@ def place_order():
         # Simpan pesanan ke database
         db.orders.insert_one(order)
 
+        # hapus seluruh cart item
+        db.carts.delete_many({"username": username})
+
         return (
             jsonify({"status": "success", "message": "Order created successfully"}),
             201,
@@ -378,9 +384,6 @@ def order(username):
 
         # Ambil semua pesanan pengguna
         orders = list(db.orders.find({"username": username}))
-
-        if not orders:
-            print(f"No orders found for {username}")  # Debugging log
 
         return render_template(
             "home/pages/orders.html",
