@@ -133,7 +133,7 @@ def login():
 
             # encode JWT dengan SECRET_KEY
             token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-            token = token.decode("utf-8")
+            # token_decode = token.decode("utf-8")
 
             return jsonify({"result": "success", "token": token, "role": user["role"]})
 
