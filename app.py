@@ -133,6 +133,7 @@ def login():
 
             # encode JWT dengan SECRET_KEY
             token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+            token = token.decode("utf-8")
 
             return jsonify({"result": "success", "token": token, "role": user["role"]})
 
@@ -588,13 +589,15 @@ def edit_user(id):
         password_receive = request.form["password_give"]
         role_receive = request.form["role_give"]
 
+        hash_password = hashlib.sha256(password_receive.encode("utf-8")).hexdigest()
+
         # memperbarui dokumen user di database
         db.users.update_one(
             {"_id": ObjectId(id)},
             {
                 "$set": {
                     "username": username_receive,
-                    "password": password_receive,
+                    "password": hash_password,
                     "role": role_receive,
                 }
             },
